@@ -43,23 +43,7 @@ Node XmlParser::parse_node() {
         if (peek() == '<' && pos + 1 < src.size() && src[pos + 1] == '/') break;
 
         if (peek() == '<') {
-            // Check for comment
-            if (pos + 1 < src.size() && src[pos+1] == '!') {
-                // Consume comment <!-- ... -->
-                pos += 2; // skip <!
-                if (pos < src.size() && src[pos] == '-' && pos+1 < src.size() && src[pos+1] == '-') {
-                     pos += 2; // skip --
-                     // Read until -->
-                     while (pos + 2 < src.size()) {
-                         if (src[pos] == '-' && src[pos+1] == '-' && src[pos+2] == '>') {
-                             pos += 3; // skip -->
-                             break;
-                         }
-                         pos++;
-                     }
-                     continue; // Loop again to find next child
-                }
-            }
+
             node.children.push_back(parse_node());
         } else {
             std::string t = read_until('<');
@@ -81,7 +65,76 @@ char XmlParser::peek() {
 }
 
 void XmlParser::skip_ws() { 
-    while (pos < src.size() && isspace(src[pos])) pos++; 
+    while (pos < src.size()) {
+        if (isspace(src[pos])) {
+            pos++;
+            continue;
+        }
+        
+        // Check for // comment
+        if (pos + 1 < src.size() && src[pos] == '/' && src[pos+1] == '/') {
+            pos += 2;
+            while (pos < src.size() && src[pos] != '\n') pos++;
+            continue;
+        }
+
+        // Check for /* comment */
+        if (pos + 1 < src.size() && src[pos] == '/' && src[pos+1] == '*') {
+            pos += 2;
+            while (pos + 1 < src.size()) {
+                if (src[pos] == '*' && src[pos+1] == '/') {
+                    pos += 2;
+                    break;
+                }
+                pos++;
+            }
+            continue;
+        }
+        
+        // Check for {* comment *}
+        if (pos + 1 < src.size() && src[pos] == '{' && src[pos+1] == '*') {
+            pos += 2;
+            while (pos + 1 < src.size()) {
+                if (src[pos] == '*' && src[pos+1] == '}') {
+                    pos += 2;
+                    break;
+                }
+                pos++;
+            }
+            continue;
+        }
+        
+        // Check for {/* comment */} (JSX style often used)
+        if (pos + 2 < src.size() && src[pos] == '{' && src[pos+1] == '/' && src[pos+2] == '*') {
+            pos += 3;
+            while (pos + 2 < src.size()) {
+                 if (src[pos] == '*' && src[pos+1] == '/' && src[pos+2] == '}') {
+                      pos += 3;
+                      break;
+                 }
+                 pos++;
+            }
+            continue;
+        }
+
+        // Check for <!-- comment --> 
+        // Move XML comment logic here?
+        // XML comments start with < which is a token char.
+        // If we handle it here, we must peek check.
+        if (pos + 3 < src.size() && src[pos] == '<' && src[pos+1] == '!' && src[pos+2] == '-' && src[pos+3] == '-') {
+            pos += 4;
+            while (pos + 2 < src.size()) {
+                 if (src[pos] == '-' && src[pos+1] == '-' && src[pos+2] == '>') {
+                      pos += 3;
+                      break;
+                 }
+                 pos++;
+            }
+            continue;
+        }
+        
+        break;
+    }
 }
 
 void XmlParser::expect(char c) { 

@@ -9,7 +9,7 @@
 #include "core/lang/parser.h"
 #include "core/lang/interpreter.h"
 #include "lib/gui/minigui.h"
-#include "lib/gui/types.h"
+#include "lib/gui/layout.h"
 #include "lib/register.h"
 
 // Define global appState needed by minigui
@@ -19,6 +19,13 @@ int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: sunda <file.sd>" << std::endl;
         return 1;
+    }
+
+    // Set global base path for relative resource loading
+    std::string scriptPath = argv[1];
+    size_t lastSlash = scriptPath.find_last_of("/\\");
+    if (lastSlash != std::string::npos) {
+        g_basePath = scriptPath.substr(0, lastSlash);
     }
 
     std::ifstream file(argv[1]);

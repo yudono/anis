@@ -51,7 +51,21 @@ std::vector<Token> Lexer::tokenize() {
             advance();
             if (c == '(') tokens.push_back({TOK_LPAREN, "("});
             else if (c == ')') tokens.push_back({TOK_RPAREN, ")"});
-            else if (c == '{') tokens.push_back({TOK_LBRACE, "{"});
+            else if (c == '{') {
+                 if (peek() == '*') {
+                      // Multi-line comment {* ... *}
+                      advance(); // skip *
+                      while (pos + 1 < src.size()) {
+                           if (src[pos] == '*' && src[pos+1] == '}') {
+                                pos += 2;
+                                break;
+                           }
+                           pos++;
+                      }
+                 } else {
+                      tokens.push_back({TOK_LBRACE, "{"});
+                 }
+            }
             else if (c == '}') tokens.push_back({TOK_RBRACE, "}"});
             else if (c == '[') tokens.push_back({TOK_LBRACKET, "["});
             else if (c == ']') tokens.push_back({TOK_RBRACKET, "]"});
@@ -67,9 +81,21 @@ std::vector<Token> Lexer::tokenize() {
             else if (c == '*') tokens.push_back({TOK_STAR, "*"});
             else if (c == '/') {
                  if (peek() == '/') {
-                      // Comment
+                      // Comment //
                       while (peek() != '\n' && pos < src.size()) advance();
-                 } else {
+                 } 
+                 else if (peek() == '*') {
+                      // Comment /* ... */
+                      advance(); // skip *
+                      while (pos + 1 < src.size()) {
+                           if (src[pos] == '*' && src[pos+1] == '/') {
+                                pos += 2;
+                                break;
+                           }
+                           pos++;
+                      }
+                 }
+                 else {
                       tokens.push_back({TOK_SLASH, "/"});
                  }
             }

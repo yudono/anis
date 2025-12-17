@@ -368,8 +368,13 @@ std::shared_ptr<Expr> Parser::primary() {
                 // Simple: loop consume and append string until '<'?
                 // For now, support ONLY JSX child or {Expr} child.
                 if (match(TOK_LBRACE)) {
-                    children.push_back(expression());
-                    consume(TOK_RBRACE, "Expect '}'");
+                    if (check(TOK_RBRACE)) {
+                        // Empty block {} (e.g. from commented out code)
+                        advance(); // consume }
+                    } else {
+                        children.push_back(expression());
+                        consume(TOK_RBRACE, "Expect '}'");
+                    }
                 } else {
                     // Primitive Text content approximation
                     std::string s = advance().text;
