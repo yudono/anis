@@ -7,6 +7,12 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <cmath>
+
+#ifndef PI
+#define PI 3.14159265359f
+#endif
+
 
 // --- FreeType State ---
 struct Character {
@@ -38,7 +44,7 @@ void init_freetype() {
     bool loaded = false;
     for (const char* path : fontPaths) {
         if (!FT_New_Face(ft, path, 0, &face)) {
-            std::cout << "[FREETYPE] Loaded font: " << path << std::endl;
+            // std::cout << "[FREETYPE] Loaded font: " << path << std::endl;
             loaded = true;
             break;
         }
@@ -181,6 +187,48 @@ void rect(float x, float y, float w, float h, Color c) {
     glVertex2f(x + w, y + h);
     glVertex2f(x, y + h);
     glEnd();
+}
+
+void draw_rounded_rect(float x, float y, float w, float h, float r, Color c) {
+    glDisable(GL_TEXTURE_2D);
+    glColor4f(c.r, c.g, c.b, c.a);
+
+    // Clamp radius
+    if (r > w/2) r = w/2;
+    if (r > h/2) r = h/2;
+
+    int num_segments = 12;
+
+    // Center part
+    glBegin(GL_QUADS);
+    glVertex2f(x+r, y);     glVertex2f(x+w-r, y);
+    glVertex2f(x+w-r, y+h); glVertex2f(x+r, y+h);
+    
+    glVertex2f(x, y+r);     glVertex2f(x+r, y+r);
+    glVertex2f(x+r, y+h-r); glVertex2f(x, y+h-r);
+    
+    glVertex2f(x+w-r, y+r);     glVertex2f(x+w, y+r);
+    glVertex2f(x+w, y+h-r);     glVertex2f(x+w-r, y+h-r);
+    glEnd();
+
+    // Corners
+    auto draw_arc = [&](float cx, float cy, float start_angle) {
+        glBegin(GL_TRIANGLE_FAN);
+        glVertex2f(cx, cy);
+        for(int i = 0; i <= num_segments; i++) {
+            float theta = start_angle + (PI * i / (2.0f * num_segments));
+            float dx = r * cosf(theta);
+            float dy = r * sinf(theta);
+            glVertex2f(cx + dx, cy + dy);
+        }
+        glEnd();
+    };
+
+    const float PI_VAL = 3.14159265f;
+    draw_arc(x+w-r, y+h-r, 0.0f);          // Bottom Right
+    draw_arc(x+r,   y+h-r, 0.5f * PI_VAL); // Bottom Left
+    draw_arc(x+r,   y+r,   1.0f * PI_VAL); // Top Left
+    draw_arc(x+w-r, y+r,   1.5f * PI_VAL); // Top Right
 }
 
 Color parse_color(const std::string& hex) {

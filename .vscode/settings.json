@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.sd": "javascript"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    }
+}

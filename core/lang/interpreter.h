@@ -1,0 +1,108 @@
+#ifndef SUNDA_INTERPRETER_H
+#define SUNDA_INTERPRETER_H
+
+#include "parser.h"
+#include <map>
+#include <string>
+#include <functional>
+
+// Forward Decl
+struct Environment;
+
+struct Value {
+    std::string strVal;
+    int intVal;
+    bool isInt; 
+    bool isClosure = false;
+    std::shared_ptr<Stmt> closureBody; 
+    std::shared_ptr<Environment> closureEnv; // Captured scope
+    std::vector<std::string> closureParams; // Added params
+    
+    // List support
+    std::vector<Value> listVal;
+    bool isList = false;
+    
+    Value(std::string s, int i, bool isI) : strVal(s), intVal(i), isInt(isI) {}
+    // Closure Constructor
+    Value(std::shared_ptr<Stmt> body, std::shared_ptr<Environment> env = nullptr, std::vector<std::string> params = {}) 
+        : strVal("function"), intVal(0), isInt(false), isClosure(true), closureBody(body), closureEnv(env), closureParams(params) {}
+    // List Constructor
+    Value(std::vector<Value> list) : strVal(""), intVal(0), isInt(false), isList(true), listVal(list) {} 
+    
+    // Default
+    Value() : strVal(""), intVal(0), isInt(false) {}
+    
+    std::string toString() const { 
+        if (isClosure) return "[Function]";
+        if (isList) return "[List]";
+        return isInt ? std::to_string(intVal) : strVal; 
+    }
+};
+
+struct Environment {
+    std::map<std::string, Value> values;
+    std::shared_ptr<Environment> enclosing;
+    
+    Environment(std::shared_ptr<Environment> enc = nullptr) : enclosing(enc) {}
+    
+    void define(std::string name, Value v) {
+        values[name] = v;
+    }
+    
+    // Assign to nearest scope
+    void assign(std::string name, Value v) {
+        if (values.count(name)) {
+            values[name] = v;
+            return;
+        }
+        if (enclosing) enclosing->assign(name, v);
+    }
+    
+    // Get from nearest scope
+    Value get(std::string name) {
+        if (values.count(name)) return values[name];
+        if (enclosing) return enclosing->get(name);
+        return {"undefined", 0, false};
+    }
+};
+
+class Interpreter {
+public:
+    std::shared_ptr<Environment> globals;
+    std::shared_ptr<Environment> environment; // Current scope
+    
+    std::map<std::string, std::function<Value(std::vector<Value>)>> natives;
+    
+    Value lastReturnValue;
+     bool isReturning = false;
+    
+    // Hooks State
+    std::vector<Value> hooks;
+    int hookIndex = 0;
+     
+    void resetHooks() { hookIndex = 0; }
+
+public:
+    // Helpers
+   void setVar(std::string name, Value v);
+   Value getVar(std::string name);
+
+    Interpreter();
+    void interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
+    void registerNative(std::string name, std::function<Value(std::vector<Value>)> func);
+    
+    // API for host
+    Value getGlobal(std::string name);
+    void callFunction(std::string name);
+    Value callClosure(Value closure, std::vector<Value> args = {}); 
+    void executeClosure(Value closure, std::vector<Value> args = {}); 
+    
+private:
+    void execute(std::shared_ptr<Stmt> stmt);
+    Value evaluate(std::shared_ptr<Expr> expr);
+    
+    void executeBlock(std::shared_ptr<BlockStmt> block, std::shared_ptr<Environment> env);
+
+};
+
+#endif

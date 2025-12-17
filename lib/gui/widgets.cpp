@@ -2,24 +2,35 @@
 #include "renderer.h"
 #include <iostream>
 
-bool button(float x, float y, float w, float h,
-            const std::string& label,
-            double mx, double my, bool click) {
-
+bool button(float x, float y, float w, float h, const std::string& label,
+            double mx, double my, bool click, Color bgOverride, float fontSize) {
     bool hover = mx > x && mx < x+w && my > y && my < y+h;
 
-    // Background (Modern Flat)
-    // Blue for primary, Gray for slightly distinct
-    Color bg = hover ? Color{0.25f, 0.5f, 0.9f, 1.0f} : Color{0.3f, 0.6f, 1.0f, 1.0f}; 
-    rect(x, y, w, h, bg);
+    // Default Gray, Hover Blue. Or use override.
+    Color base = (bgOverride.r == -1) 
+                 ? (hover ? Color{0.6f, 0.6f, 0.6f, 1.0f} : Color{0.8f, 0.8f, 0.8f, 1.0f}) 
+                 : bgOverride;
+                 
+    if (bgOverride.r != -1 && hover) {
+        // slightly darken override on hover
+        base.r *= 0.9f; base.g *= 0.9f; base.b *= 0.9f;
+    }
 
-    // Text (White for better contrast on Blue button)
-    Color txtColor = {1,1,1,1}; 
+    // Transparent handling (alpha 0)
+    if (base.a > 0) {
+        draw_rounded_rect(x, y, w, h, 6.0f, base);
+    }
     
-    float textWidth = measure_text_width(label);
+    // Text Color
+    Color txtColor = {0.2f, 0.2f, 0.2f, 1};
+    if (base.r < 0.5f && base.a > 0.5f) txtColor = {1,1,1,1}; // Dark bg -> White text
+    if (bgOverride.r != -1 && base.a == 0) txtColor = {1,1,1,1}; // Transparent bg -> likely white text (for sidebar)
+    
+    float scale = fontSize / 16.0f;
+    float textWidth = measure_text_width(label, scale);
     float tx = x + (w - textWidth) / 2;
-    float ty = y + (h - 16) / 2;
-    draw_text(tx, ty, label, 1.0f, txtColor);
+    float ty = y + (h - (16 * scale)) / 2;
+    draw_text(tx, ty, label, scale, txtColor);
 
     return hover && click;
 }

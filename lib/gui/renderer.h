@@ -13,6 +13,7 @@ unsigned int load_image(const char* path);
 void draw_image(unsigned int tex, float x, float y, float w, float h);
 
 void rect(float x, float y, float w, float h, Color c = {1,1,1,1});
+void draw_rounded_rect(float x, float y, float w, float h, float r, Color c);
 Color parse_color(const std::string& hex);
 
 #endif
