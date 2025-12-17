@@ -18,25 +18,29 @@ struct Value {
     std::shared_ptr<Environment> closureEnv; // Captured scope
     std::vector<std::string> closureParams; // Added params
     
-    // List support
-    std::vector<Value> listVal;
+    // List support (Reference Semantics)
+    std::shared_ptr<std::vector<Value>> listVal;
     bool isList = false;
+
+    // Map/Object support (Reference Semantics)
+    std::shared_ptr<std::map<std::string, Value>> mapVal;
+    bool isMap = false;
+
+    // Native Function
+    using NativeFunc = std::function<Value(std::vector<Value>)>;
+    NativeFunc nativeFunc;
+    bool isNative = false;
     
-    Value(std::string s, int i, bool isI) : strVal(s), intVal(i), isInt(isI) {}
-    // Closure Constructor
-    Value(std::shared_ptr<Stmt> body, std::shared_ptr<Environment> env = nullptr, std::vector<std::string> params = {}) 
-        : strVal("function"), intVal(0), isInt(false), isClosure(true), closureBody(body), closureEnv(env), closureParams(params) {}
-    // List Constructor
-    Value(std::vector<Value> list) : strVal(""), intVal(0), isInt(false), isList(true), listVal(list) {} 
+    Value(std::string s, int i, bool isI);
+    Value(std::shared_ptr<Stmt> body, std::shared_ptr<Environment> env = nullptr, std::vector<std::string> params = {});
+    Value(std::vector<Value> list);
+    Value(std::map<std::string, Value> map);
+    Value(NativeFunc func);
+    Value();
     
-    // Default
-    Value() : strVal(""), intVal(0), isInt(false) {}
+    std::string toString() const;
     
-    std::string toString() const { 
-        if (isClosure) return "[Function]";
-        if (isList) return "[List]";
-        return isInt ? std::to_string(intVal) : strVal; 
-    }
+
 };
 
 struct Environment {

@@ -8,7 +8,7 @@ GUI_DIR = lib/gui
 
 # Source files
 # LANG_SRC = $(wildcard core/lang/*.cpp) # Use manual list if wildcard issues
-LANG_SRC = core/lang/lexer.cpp core/lang/parser.cpp core/lang/interpreter.cpp
+LANG_SRC = core/lang/lexer.cpp core/lang/parser.cpp core/lang/interpreter.cpp core/lang/value_impl.cpp
 LIB_SRC = lib/register.cpp
 GUI_SRC = lib/gui/renderer.cpp lib/gui/parser.cpp lib/gui/widgets.cpp lib/gui/layout.cpp lib/gui/minigui.cpp
 MAIN_SRC = sunda.cpp
@@ -82,7 +82,7 @@ build/register.o: lib/register.cpp
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-SUNDA_OBJS = build/sunda.o build/register.o build/lang_lexer.o build/lang_parser.o build/lang_interpreter.o \
+SUNDA_OBJS = build/sunda.o build/register.o build/lang_lexer.o build/lang_parser.o build/lang_interpreter.o build/lang_value_impl.o \
              build/renderer.o build/parser.o build/widgets.o build/layout.o build/minigui.o
 
 sunda: $(SUNDA_OBJS)

@@ -1,0 +1,10 @@
+function add(x, y) {
+    return x + y
+}
+
+function sub(x, y) {
+    return x - y
+}
+
+println(add(5, 3))
+println(sub(10, 4))

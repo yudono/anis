@@ -1,0 +1,21 @@
+// Test if function declarations go to global scope
+
+function testFunc() {
+    return 42
+}
+
+println("testFunc defined")
+
+// Try to access it via a native function that uses getGlobal
+import { render_gui } from "gui"
+
+function App() {
+    return (
+        <Page>
+            <Text>Test</Text>
+        </Page>
+    )
+}
+
+println("About to call render_gui")
+render_gui(App)

@@ -1,0 +1,8 @@
+// Test if native functions are available after import
+
+println("Before import")
+
+import { render_gui } from "gui"
+
+println("After import")
+println("Type of render_gui: ", render_gui)

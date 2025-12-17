@@ -15,14 +15,16 @@ std::vector<Token> Lexer::tokenize() {
             if (ident == "var") tokens.push_back({TOK_VAR, ident});
             else if (ident == "if") tokens.push_back({TOK_IF, ident});
             else if (ident == "for") tokens.push_back({TOK_FOR, ident});
+            else if (ident == "while") tokens.push_back({TOK_WHILE, ident});
             else if (ident == "function") tokens.push_back({TOK_FUNCTION, ident});
+            else if (ident == "import") tokens.push_back({TOK_IMPORT, ident});
+            else if (ident == "from") tokens.push_back({TOK_FROM, ident});
             else if (ident == "return") tokens.push_back({TOK_RETURN, ident});
-            else if (ident == "switch") tokens.push_back({TOK_SWITCH, ident}); // Added
+            else if (ident == "export") tokens.push_back({TOK_EXPORT, ident});
+            else if (ident == "switch") tokens.push_back({TOK_SWITCH, ident});
             else if (ident == "case") tokens.push_back({TOK_CASE, ident});
             else if (ident == "default") tokens.push_back({TOK_DEFAULT, ident});
-            else if (ident == "const") tokens.push_back({TOK_CONST, ident}); // Added
-            else if (ident == "import") tokens.push_back({TOK_IMPORT, ident});
-            else if (ident == "form" || ident == "from") tokens.push_back({TOK_FROM, ident}); 
+            else if (ident == "const") tokens.push_back({TOK_CONST, ident});
             else tokens.push_back({TOK_IDENTIFIER, ident});
         } else if (isdigit(c)) {
             // ...
@@ -72,12 +74,25 @@ std::vector<Token> Lexer::tokenize() {
             else if (c == ';') tokens.push_back({TOK_SEMICOLON, ";"});
             else if (c == ':') tokens.push_back({TOK_COLON, ":"}); // Added
             else if (c == ',') tokens.push_back({TOK_COMMA, ","});
-            else if (c == '.') tokens.push_back({TOK_DOT, "."});
+            else if (c == '.') {
+                 if (peek() == '.' && pos + 1 < src.size() && src[pos+1] == '.') {
+                      advance(); advance(); // consume two more dots
+                      tokens.push_back({TOK_DOT_DOT_DOT, "..."});
+                 } else {
+                      tokens.push_back({TOK_DOT, "."});
+                 }
+            }
             else if (c == '+') {
                  if (peek() == '=') { advance(); tokens.push_back({TOK_PLUS_EQUAL, "+="}); }
                  else tokens.push_back({TOK_PLUS, "+"});
             }
             else if (c == '-') tokens.push_back({TOK_MINUS, "-"});
+            else if (c == '&') {
+                 if (peek() == '&') { advance(); tokens.push_back({TOK_AND, "&&"}); }
+            }
+            else if (c == '|') {
+                 if (peek() == '|') { advance(); tokens.push_back({TOK_OR, "||"}); }
+            }
             else if (c == '*') tokens.push_back({TOK_STAR, "*"});
             else if (c == '/') {
                  if (peek() == '/') {
@@ -99,12 +114,21 @@ std::vector<Token> Lexer::tokenize() {
                       tokens.push_back({TOK_SLASH, "/"});
                  }
             }
-            else if (c == '<') tokens.push_back({TOK_LT, "<"});
-            else if (c == '>') tokens.push_back({TOK_GT, ">"});
+            else if (c == '<') {
+                 if (peek() == '=') { advance(); tokens.push_back({TOK_LTE, "<="}); }
+                 else tokens.push_back({TOK_LT, "<"});
+            }
+            else if (c == '>') {
+                 if (peek() == '=') { advance(); tokens.push_back({TOK_GTE, ">="}); }
+                 else tokens.push_back({TOK_GT, ">"});
+            }
             else if (c == '=') {
                 if (peek() == '=') { advance(); tokens.push_back({TOK_EQEQ, "=="}); }
                 else if (peek() == '>') { advance(); tokens.push_back({TOK_ARROW, "=>"}); } // Added
                 else tokens.push_back({TOK_EQ, "="});
+            }
+            else if (c == '!') {
+                 if (peek() == '=') { advance(); tokens.push_back({TOK_NE, "!="}); }
             }
         }
     }

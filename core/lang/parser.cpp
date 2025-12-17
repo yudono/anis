@@ -14,6 +14,12 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
 }
 
 std::shared_ptr<Stmt> Parser::declaration() {
+    // Export statement
+    if (match(TOK_EXPORT)) {
+        auto decl = declaration();  // Parse what follows (function, var, etc)
+        return std::make_shared<ExportStmt>(decl);
+    }
+    
     if (match(TOK_VAR)) {
         Token name = consume(TOK_IDENTIFIER, "Expect variable name.");
         std::shared_ptr<Expr> init = nullptr;
@@ -54,7 +60,25 @@ std::shared_ptr<Stmt> Parser::declaration() {
         std::vector<std::string> params;
         if (!check(TOK_RPAREN)) {
             do {
-                if (match(TOK_IDENTIFIER)) {
+                // Check for destructuring pattern { a, b, c }
+                if (match(TOK_LBRACE)) {
+                    std::vector<std::string> props;
+                    if (!check(TOK_RBRACE)) {
+                        do {
+                            Token prop = consume(TOK_IDENTIFIER, "Expect property name in destructuring.");
+                            props.push_back(prop.text);
+                        } while (match(TOK_COMMA));
+                    }
+                    consume(TOK_RBRACE, "Expect '}' after destructuring pattern.");
+                    // Store as special format: "__destruct:{a,b,c}"
+                    std::string pattern = "__destruct:{";
+                    for (size_t i = 0; i < props.size(); i++) {
+                        pattern += props[i];
+                        if (i < props.size() - 1) pattern += ",";
+                    }
+                    pattern += "}";
+                    params.push_back(pattern);
+                } else if (match(TOK_IDENTIFIER)) {
                     params.push_back(previous().text);
                 }
             } while (match(TOK_COMMA));
@@ -108,6 +132,13 @@ std::shared_ptr<Stmt> Parser::statement() {
         consume(TOK_RPAREN, "Expect ')' after condition.");
         std::shared_ptr<Stmt> thenBranch = statement();
         return std::make_shared<IfStmt>(condition, thenBranch);
+    }
+    if (match(TOK_WHILE)) {
+        consume(TOK_LPAREN, "Expect '(' after while.");
+        std::shared_ptr<Expr> condition = expression();
+        consume(TOK_RPAREN, "Expect ')' after condition.");
+        std::shared_ptr<Stmt> body = statement();
+        return std::make_shared<WhileStmt>(condition, body);
     }
     if (match(TOK_SWITCH)) {
         consume(TOK_LPAREN, "Expect '(' after switch.");
@@ -166,17 +197,20 @@ std::shared_ptr<Expr> Parser::expression() {
 }
 
 std::shared_ptr<Expr> Parser::assignment() {
-    std::shared_ptr<Expr> expr = equality();
+    std::shared_ptr<Expr> expr = logicalOr();
     
     if (match(TOK_EQ)) {
         std::shared_ptr<Expr> value = assignment();
         if (auto var = std::dynamic_pointer_cast<VarExpr>(expr)) {
             return std::make_shared<BinaryExpr>(var, "=", value);
         }
+        if (auto mem = std::dynamic_pointer_cast<MemberExpr>(expr)) {
+            return std::make_shared<BinaryExpr>(mem, "=", value);
+        }
         std::cerr << "Invalid assignment target." << std::endl;
     }
     if (match(TOK_PLUS_EQUAL)) {
-        std::shared_ptr<Expr> value = assignment(); // right-associative?
+        std::shared_ptr<Expr> value = assignment();
         if (auto var = std::dynamic_pointer_cast<VarExpr>(expr)) {
              return std::make_shared<BinaryExpr>(var, "+=", value);
         }
@@ -185,20 +219,63 @@ std::shared_ptr<Expr> Parser::assignment() {
     return expr;
 }
 
+std::shared_ptr<Expr> Parser::logicalOr() {
+    std::shared_ptr<Expr> expr = logicalAnd();
+    while (match(TOK_OR)) {
+        std::shared_ptr<Expr> right = logicalAnd();
+        expr = std::make_shared<BinaryExpr>(expr, "||", right);
+    }
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::logicalAnd() {
+    std::shared_ptr<Expr> expr = equality();
+    while (match(TOK_AND)) {
+        std::shared_ptr<Expr> right = equality();
+        expr = std::make_shared<BinaryExpr>(expr, "&&", right);
+    }
+    return expr;
+}
+
 std::shared_ptr<Expr> Parser::equality() {
+    std::shared_ptr<Expr> expr = comparison();
+    while (match(TOK_EQEQ) || match(TOK_NE)) {
+        std::string op = previous().type == TOK_EQEQ ? "==" : "!=";
+        std::shared_ptr<Expr> right = comparison();
+        expr = std::make_shared<BinaryExpr>(expr, op, right);
+    }
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::comparison() {
     std::shared_ptr<Expr> expr = term();
-    while (match(TOK_EQEQ)) { // != not valid yet
+    while (match(TOK_LT) || match(TOK_GT) || match(TOK_LTE) || match(TOK_GTE)) {
+        std::string op;
+        if (previous().type == TOK_LT) op = "<";
+        else if (previous().type == TOK_GT) op = ">";
+        else if (previous().type == TOK_LTE) op = "<=";
+        else if (previous().type == TOK_GTE) op = ">=";
         std::shared_ptr<Expr> right = term();
-        expr = std::make_shared<BinaryExpr>(expr, "==", right);
+        expr = std::make_shared<BinaryExpr>(expr, op, right);
     }
     return expr;
 }
 
 std::shared_ptr<Expr> Parser::term() {
-    std::shared_ptr<Expr> expr = primary(); // factor?
+    std::shared_ptr<Expr> expr = factor();
     while (match(TOK_PLUS) || match(TOK_MINUS)) {
         std::string op = previous().type == TOK_PLUS ? "+" : "-";
-        std::shared_ptr<Expr> right = primary(); 
+        std::shared_ptr<Expr> right = factor(); 
+        expr = std::make_shared<BinaryExpr>(expr, op, right);
+    }
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::factor() {
+    std::shared_ptr<Expr> expr = call();
+    while (match(TOK_STAR) || match(TOK_SLASH)) {
+        std::string op = previous().type == TOK_STAR ? "*" : "/";
+        std::shared_ptr<Expr> right = call();
         expr = std::make_shared<BinaryExpr>(expr, op, right);
     }
     return expr;
@@ -208,13 +285,41 @@ std::shared_ptr<Expr> Parser::primary() {
     if (match(TOK_NUMBER)) return std::make_shared<LiteralExpr>(previous().text, false);
     if (match(TOK_STRING)) return std::make_shared<LiteralExpr>(previous().text, true);
     
-    // Identifier or Call
+    // Identifier
     if (match(TOK_IDENTIFIER)) {
-        std::string name = previous().text;
-        if (match(TOK_LPAREN)) {
-            return finishCall(name);
+        return std::make_shared<VarExpr>(previous().text);
+    }
+    
+    // Object Literal
+    if (match(TOK_LBRACE)) {
+        std::map<std::string, std::shared_ptr<Expr>> props;
+        if (!check(TOK_RBRACE)) {
+            do {
+                Token key = consume(TOK_IDENTIFIER, "Expect key.");
+                consume(TOK_COLON, "Expect ':' after key.");
+                std::shared_ptr<Expr> val = expression();
+                props[key.text] = val;
+            } while (match(TOK_COMMA));
         }
-        return std::make_shared<VarExpr>(name);
+        consume(TOK_RBRACE, "Expect '}' after object literal.");
+        return std::make_shared<ObjectExpr>(props);
+    }
+    
+    // Array Literal
+    if (match(TOK_LBRACKET)) {
+        std::vector<std::shared_ptr<Expr>> elements;
+        if (!check(TOK_RBRACKET)) {
+            do {
+                if (match(TOK_DOT_DOT_DOT)) {
+                    auto arg = expression();
+                    elements.push_back(std::make_shared<SpreadExpr>(arg));
+                } else {
+                    elements.push_back(expression());
+                }
+            } while (match(TOK_COMMA));
+        }
+        consume(TOK_RBRACKET, "Expect ']' after array literal.");
+        return std::make_shared<ArrayExpr>(elements);
     }
     
     // Grouping or Lambda: ( ) or (a, b) =>
@@ -398,18 +503,36 @@ std::shared_ptr<Expr> Parser::primary() {
     throw std::runtime_error("Unexpected token in primary expression.");
 }
 
-std::shared_ptr<CallExpr> Parser::finishCall(std::string name) {
-    std::vector<std::shared_ptr<Expr>> args;
-    if (!check(TOK_RPAREN)) {
-        do {
-            if (args.size() >= 255) {
-                std::cerr << "Can't have more than 255 arguments." << std::endl;
+std::shared_ptr<Expr> Parser::call() {
+    std::shared_ptr<Expr> expr = primary();
+    
+    while (true) {
+        if (match(TOK_LPAREN)) {
+            // Function Call: expr(args)
+            std::vector<std::shared_ptr<Expr>> args;
+            if (!check(TOK_RPAREN)) {
+                do {
+                    args.push_back(expression());
+                } while (match(TOK_COMMA));
             }
-            args.push_back(expression());
-        } while (match(TOK_COMMA));
+            consume(TOK_RPAREN, "Expect ')' after arguments.");
+            expr = std::make_shared<CallExpr>(expr, args);
+        }
+        else if (match(TOK_DOT)) {
+            Token name = consume(TOK_IDENTIFIER, "Expect property name after '.'.");
+            expr = std::make_shared<MemberExpr>(expr, std::make_shared<LiteralExpr>(name.text, true), false);
+        }
+        else if (match(TOK_LBRACKET)) {
+            std::shared_ptr<Expr> index = expression();
+            consume(TOK_RBRACKET, "Expect ']' after index.");
+            expr = std::make_shared<MemberExpr>(expr, index, true);
+        }
+        else {
+            break;
+        }
     }
-    consume(TOK_RPAREN, "Expect ')' after arguments.");
-    return std::make_shared<CallExpr>(name, args);
+    
+    return expr;
 }
 
 // Helpers

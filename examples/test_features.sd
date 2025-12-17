@@ -1,0 +1,39 @@
+
+// Test Objects
+println("--- Objects ---")
+var obj = { a: 10, b: 20 }
+println("obj: ", obj)
+println("obj.a: ", obj.a)
+obj.a = 50
+println("obj.a after set: ", obj.a)
+
+// Reference Semantics
+println("--- Reference Semantics ---")
+var ref = obj
+ref.b = 99
+println("obj.b after ref update: ", obj.b)
+
+// Test Arrays
+println("--- Arrays ---")
+var arr = [1, 2, 3]
+println("arr: ", arr)
+arr.push(4)
+println("arr after push: ", arr)
+
+println("--- Map ---")
+var mapped = arr.map((x) => {
+    return x * 2
+})
+println("mapped: ", mapped)
+
+println("--- Filter ---")
+var filtered = arr.filter((x) => {
+    if (x > 2) { return 1 }
+    return 0
+})
+println("filtered: ", filtered)
+
+// Test Array Access
+println("arr[0]: ", arr[0])
+
+println("--- Done ---")

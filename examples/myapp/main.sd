@@ -1,0 +1,55 @@
+import { render_gui, setState } from "gui"
+import { ListView } from "./views/list.sd"
+import { FormView } from "./views/form.sd"
+
+function App() {
+    const [view, setView] = setState("list")
+    const [items, setItems] = setState([
+        { id: 1, name: "Apple" },
+        { id: 2, name: "Banana" }
+    ])
+    const [editItem, setEditItem] = setState(null)
+
+    return (
+        <Page width="100%" height="100%" backgroundColor="#f5f5f5">
+            {view == "list" && (
+                <ListView
+                    items={items}
+                    onAdd={() => {
+                        setEditItem(null)
+                        setView("form")
+                    }}
+                    onEdit={(item) => {
+                        setEditItem(item)
+                        setView("form")
+                    }}
+                    onDelete={(id) => {
+                        setItems(items.filter(i => i.id != id))
+                    }}
+                />
+            )}
+
+            {view == "form" && (
+                <FormView
+                    item={editItem}
+                    onSave={(data) => {
+                        if (editItem) {
+                            setItems(items.map(i =>
+                                i.id == editItem.id ? data : i
+                            ))
+                        } else {
+                            setItems([
+                                ...items,
+                                { ...data, id: Date.now() }
+                            ])
+                        }
+                        setView("list")
+                    }}
+                    onCancel={() => setView("list")}
+                />
+            )}
+        </Page>
+    )
+}
+
+render_gui(App)

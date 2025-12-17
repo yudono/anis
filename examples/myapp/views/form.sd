@@ -1,0 +1,38 @@
+import { setState } from "gui"
+
+export function FormView({ item, onSave, onCancel }) {
+    const [name, setName] = setState(item ? item.name : "")
+
+    return (
+        <Column padding="20px" width="400px">
+            <Text fontSize="24px">
+                {item ? "Edit Item" : "Add Item"}
+            </Text>
+
+            <View height="20px" />
+
+            <Textfield
+                value={name}
+                onInput={setName}
+                placeholder="Item name"
+            />
+
+            <View height="20px" />
+
+            <Row>
+                <Button
+                    onClick={() => onSave({
+                        id: item ? item.id : null,
+                        name
+                    })}
+                >
+                    Save
+                </Button>
+
+                <View width="10px" />
+
+                <Button onClick={onCancel}>Cancel</Button>
+            </Row>
+        </Column>
+    )
+}

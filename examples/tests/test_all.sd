@@ -1,0 +1,20 @@
+println("=== TEST BASIC ===")
+import "./test_basic.sd"
+println("=== TEST FUNCTION ===")
+import "./test_function.sd"
+println("=== TEST RECURSION ===")
+import "./test_recursion.sd"
+println("=== TEST FIBONACCI ===")
+import "./test_fibonacci.sd"
+println("=== TEST ARRAY SORT ===")
+import "./test_array_sort.sd"
+println("=== TEST OBJECT ===")
+import "./test_object.sd"
+println("=== TEST ARRAY OBJECT ===")
+import "./test_array_object.sd"
+println("=== TEST STATE ===")
+import "./test_state.sd"
+println("=== TEST CRUD ===")
+import "./test_crud.sd"
+
+println("=== ALL TESTS FINISHED ===")

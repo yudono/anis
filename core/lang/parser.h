@@ -26,9 +26,31 @@ struct VarExpr : Expr {
 };
 
 struct CallExpr : Expr {
-    std::string callee;
+    std::shared_ptr<Expr> callee; // Changed from string to Expr
     std::vector<std::shared_ptr<Expr>> args;
-    CallExpr(std::string c, std::vector<std::shared_ptr<Expr>> a) : callee(c), args(a) {}
+    CallExpr(std::shared_ptr<Expr> c, std::vector<std::shared_ptr<Expr>> a) : callee(c), args(a) {}
+};
+
+struct MemberExpr : Expr {
+    std::shared_ptr<Expr> object;
+    std::shared_ptr<Expr> property;
+    bool computed; // true for [], false for .
+    MemberExpr(std::shared_ptr<Expr> o, std::shared_ptr<Expr> p, bool c) : object(o), property(p), computed(c) {}
+};
+
+struct ObjectExpr : Expr {
+    std::map<std::string, std::shared_ptr<Expr>> properties;
+    ObjectExpr(std::map<std::string, std::shared_ptr<Expr>> p) : properties(p) {}
+};
+
+struct ArrayExpr : Expr {
+    std::vector<std::shared_ptr<Expr>> elements;
+    ArrayExpr(std::vector<std::shared_ptr<Expr>> e) : elements(e) {}
+};
+
+struct SpreadExpr : Expr {
+    std::shared_ptr<Expr> argument;
+    SpreadExpr(std::shared_ptr<Expr> arg) : argument(arg) {}
 };
 
 struct BinaryExpr : Expr {
@@ -55,6 +77,12 @@ struct IfStmt : Stmt {
     std::shared_ptr<Stmt> elseBranch;
     IfStmt(std::shared_ptr<Expr> c, std::shared_ptr<Stmt> t, std::shared_ptr<Stmt> e = nullptr) 
         : condition(c), thenBranch(t), elseBranch(e) {}
+};
+
+struct WhileStmt : Stmt {
+    std::shared_ptr<Expr> condition;
+    std::shared_ptr<Stmt> body;
+    WhileStmt(std::shared_ptr<Expr> c, std::shared_ptr<Stmt> b) : condition(c), body(b) {}
 };
 
 struct Case {
@@ -110,6 +138,11 @@ struct DestructureStmt : Stmt {
     DestructureStmt(std::vector<std::string> n, std::shared_ptr<Expr> i) : names(n), initializer(i) {}
 };
 
+struct ExportStmt : Stmt {
+    std::shared_ptr<Stmt> declaration;
+    ExportStmt(std::shared_ptr<Stmt> d) : declaration(d) {}
+};
+
 struct ExprStmt : Stmt {
     std::shared_ptr<Expr> expr;
     ExprStmt(std::shared_ptr<Expr> e) : expr(e) {}
@@ -126,8 +159,13 @@ private:
     std::shared_ptr<Stmt> statement();
     std::shared_ptr<Expr> expression();
     std::shared_ptr<Expr> assignment();
+    std::shared_ptr<Expr> logicalOr();
+    std::shared_ptr<Expr> logicalAnd();
     std::shared_ptr<Expr> equality();
+    std::shared_ptr<Expr> comparison();
     std::shared_ptr<Expr> term();
+    std::shared_ptr<Expr> factor();
+    std::shared_ptr<Expr> call(); // Added
     std::shared_ptr<Expr> primary();
     
     bool match(TokenType t);

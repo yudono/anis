@@ -47,8 +47,8 @@ struct GuiLib {
                   Value currentVal = interpreter.hooks[idx];
                   
                   // Synthesize Setter Closure: (val) => updateHook(idx, val)
-                  // AST: CallExpr("updateHook", [Literal(idx), Var("val")])
-                  auto callExpr = std::make_shared<CallExpr>("updateHook", std::vector<std::shared_ptr<Expr>>{
+                  // AST: CallExpr(VarExpr("updateHook"), [Literal(idx), Var("val")])
+                  auto callExpr = std::make_shared<CallExpr>(std::make_shared<VarExpr>("updateHook"), std::vector<std::shared_ptr<Expr>>{
                       std::make_shared<LiteralExpr>(std::to_string(idx), false),
                       std::make_shared<VarExpr>("val")
                   });
@@ -75,16 +75,16 @@ struct GuiLib {
                  return Value("", 0, true);
              });
 
-             // Start Main Loop via minigui
-             render_gui([&](){
-                  interpreter.resetHooks(); // Reset index each render
-                  Value v = interpreter.getGlobal("App");
-                  if (v.isClosure) {
-                      Value ret = interpreter.callClosure(v);
-                      return ret.toString();
-                  }
-                  return std::string("<Page><Text>Error: App not found</Text></Page>");
-             });
+              // Start Main Loop via minigui
+              render_gui([&](){
+                   interpreter.resetHooks(); // Reset index each render
+                   Value v = interpreter.getGlobal("App");
+                   if (v.isClosure) {
+                       Value ret = interpreter.callClosure(v);
+                       return ret.toString();
+                   }
+                   return std::string("<Page><Text>Error: App not found</Text></Page>");
+              });
              
              return Value("", 0, true);
          });

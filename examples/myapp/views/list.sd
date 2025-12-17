@@ -1,0 +1,30 @@
+export function ListView({ items, onAdd, onEdit, onDelete }) {
+    return (
+        <Column padding="20px">
+            <Row justifyContent="between" alignItems="center">
+                <Text fontSize="28px">Product List</Text>
+                <Button onClick={onAdd}>Add New</Button>
+            </Row>
+
+            <View height="20px" />
+
+            {items.map(item => (
+                <Row
+                    key={item.id}
+                    justifyContent="between"
+                    padding="10px"
+                    backgroundColor="#ffffff"
+                    marginBottom="10px"
+                >
+                    <Text>{item.name}</Text>
+
+                    <Row>
+                        <Button onClick={() => onEdit(item)}>Edit</Button>
+                        <View width="10px" />
+                        <Button onClick={() => onDelete(item.id)}>Delete</Button>
+                    </Row>
+                </Row>
+            ))}
+        </Column>
+    )
+}

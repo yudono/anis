@@ -1,0 +1,11 @@
+// Debug: test if native functions receive args correctly
+
+function testFunc() {
+    println("testFunc called!")
+    return 42
+}
+
+println("Calling println with testFunc:")
+println(testFunc)
+
+println("\nDone")

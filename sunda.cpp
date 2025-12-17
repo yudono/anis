@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     std::string scriptPath = argv[1];
     size_t lastSlash = scriptPath.find_last_of("/\\");
     if (lastSlash != std::string::npos) {
-        g_basePath = scriptPath.substr(0, lastSlash);
+        g_basePath = scriptPath.substr(0, lastSlash + 1);  // Include the slash
     }
 
     std::ifstream file(argv[1]);

@@ -1,0 +1,14 @@
+var a = 10
+var b = 20
+
+if (a < b) {
+    println("a lebih kecil dari b")
+} else {
+    println("a lebih besar atau sama")
+}
+
+var i = 0
+while (i < 3) {
+    println("i =", i)
+    i = i + 1
+}
