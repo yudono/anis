@@ -60,6 +60,7 @@ struct GuiLib {
               Value setterClosure(std::make_shared<BlockStmt>(), nullptr, std::vector<std::string>{"newVal"});
               setterClosure.isClosure = true;
               setterClosure.isNative = true;
+              setterClosure.nativeId = "hook_cb_" + std::to_string(idx); // Stable ID for hook setter
               setterClosure.nativeFunc = [idx, &interpreter](std::vector<Value> innerArgs) {
                    if (innerArgs.size() > 0) {
                        interpreter.hooks[idx] = innerArgs[0];

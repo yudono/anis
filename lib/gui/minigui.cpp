@@ -13,6 +13,11 @@
 std::map<std::string, std::function<void()>> clickRegistry;
 std::map<std::string, std::function<void(std::string)>> changeRegistry;
 std::map<std::string, std::function<std::string()>> dataRegistry;
+std::map<std::string, TextBox> textboxes;
+
+TextBox& get_textbox(const std::string& id) {
+    return textboxes[id];
+}
 
 void bind_click(const std::string& id, std::function<void()> callback) {
     clickRegistry[id] = callback;

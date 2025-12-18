@@ -412,7 +412,10 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
              Value attrVal = evaluate(attr.second);
              if (key.substr(0, 2) == "on" && attrVal.isClosure) {
                  std::string id = "cb_" + std::to_string((uintptr_t)attrVal.closureBody.get());
-                 
+                 if (attrVal.isNative && !attrVal.nativeId.empty()) {
+                     id = attrVal.nativeId;
+                 }
+
                  // Use bind_native_input for onInput, bind_native_click for others
                  if (key == "onInput" && natives.count("bind_native_input")) {
                      natives["bind_native_input"]({Value(id, 0, false), attrVal});
@@ -558,8 +561,10 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
         
         if (obj.isMap && obj.mapVal) {
             if (obj.mapVal->count(key)) return (*obj.mapVal)[key];
-            return {"", 0, false}; // Return empty string instead of "undefined"
+            return Value("", 0, false); // Return empty string instead of undefined
         }
+        
+        return Value("", 0, false); // Consistent empty fallback
         if (obj.isList && obj.listVal) {
              // Array Properties
              if (key == "length") {

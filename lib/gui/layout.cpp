@@ -686,19 +686,27 @@ void render_node(const Node& n, float x, float& y, double mx, double my, bool cl
         float tw = (w > 0) ? w : 300;
         float th = (h > 0) ? h : 40;
         
-        // Store old value to detect changes
-        static std::string oldValue = appState.notesBox.value;
+        // Identify which textbox to use (using onInput callback ID as key)
+        std::string tbId = n.attrs.count("onInput") ? n.attrs.at("onInput") : "default_tf";
+        TextBox& tb = get_textbox(tbId);
         
-        // Draw textfield (user can type freely)
-        draw_textbox(appState.notesBox, x, y, tw, th, mx, my, click, sizeScale);
+        // Initial sync from props (only if not currently focused by user)
+        if (n.attrs.count("value") && appState.activeTextbox != &tb) {
+            tb.value = n.attrs.at("value");
+        }
+        
+        // Use a static map to track last triggered value per-instance
+        static std::map<std::string, std::string> lastValues;
+        
+        // Draw textfield
+        draw_textbox(tb, x, y, tw, th, mx, my, click, sizeScale);
         
         // If value changed, trigger onInput callback
-        if (appState.notesBox.value != oldValue) {
+        if (tb.value != lastValues[tbId]) {
             if (n.attrs.count("onInput")) {
-                std::string callbackId = n.attrs.at("onInput");
-                trigger_change(callbackId, appState.notesBox.value);
+                trigger_change(tbId, tb.value);
             }
-            oldValue = appState.notesBox.value;
+            lastValues[tbId] = tb.value;
         }
         
         y += th;

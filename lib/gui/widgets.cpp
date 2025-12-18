@@ -44,7 +44,8 @@ void draw_textbox(TextBox& tb, float x, float y, float w, float h,
             tb.focus = true;
             appState.activeTextbox = &tb;
         } else if (appState.activeTextbox == &tb) {
-           // check outside
+            tb.focus = false;
+            appState.activeTextbox = nullptr;
         }
     }
     

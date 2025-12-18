@@ -30,6 +30,7 @@ struct Value {
     using NativeFunc = std::function<Value(std::vector<Value>)>;
     NativeFunc nativeFunc;
     bool isNative = false;
+    std::string nativeId; // Stable identification for native closures
     
     Value(std::string s, int i, bool isI);
     Value(std::shared_ptr<Stmt> body, std::shared_ptr<Environment> env = nullptr, std::vector<std::string> params = {});
