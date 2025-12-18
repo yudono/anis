@@ -83,7 +83,6 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
             imp->moduleName == "http") {
             // Built-in module: import requested symbols
             if (!imp->symbols.empty()) {
-                // Import specific symbols: import { render_gui } from "gui"
                 for (auto& sym : imp->symbols) {
                     if (natives.count(sym)) {
                         // Create a Value wrapper for the native function
@@ -108,7 +107,7 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
         // Remote Import detection
         if (filename.find("http://") == 0 || filename.find("https://") == 0) {
             // std::cout << "[Remote Import] Fetching: " << filename << std::endl;
-            source = HTTPLib::fetch(filename);
+            source = HTTPLib::fetch("GET", filename);
             if (!source.empty()) {
                 loaded = true;
             } else {

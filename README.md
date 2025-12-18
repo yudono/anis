@@ -8,6 +8,8 @@ Sunda is a modern, lightweight, and cross-platform programming language built in
 
 - **Standard Syntax**: JavaScript-like syntax with support for arrow functions, object spread, and destructuring.
 - **Built-in GUI**: Create desktop applications using JSX-like components (`<Row>`, `<Column>`, `<Button>`, etc.).
+- **HTTP Module**: Full support for `GET` and `POST` requests via `libcurl`.
+- **Remote Imports**: Import scripts directly from URLs (`http://` or `https://`).
 - **REPL**: Interactive shell for quick prototyping and testing.
 - **Cross-Platform**: Support for macOS, Linux, and Windows.
 - **Single Binary**: Compiles to a self-contained executable with no heavy runtime dependencies.
@@ -18,9 +20,9 @@ Sunda is a modern, lightweight, and cross-platform programming language built in
 
 | OS | Requirements |
 |---|---|
-| **macOS** | Clang++, GLFW, Freetype, SQLite3, MySQL (via Homebrew) |
-| **Linux** | Clang++, `pkg-config`, `libglfw3-dev`, `libfreetype6-dev`, `libsqlite3-dev`, `libmysqlclient-dev` |
-| **Windows**| Clang++ (MinGW-w64), GLFW3, Freetype, SQLite3, MySQL |
+| **macOS** | Clang++, GLFW, Freetype, SQLite3, MySQL, Libcurl (via Homebrew) |
+| **Linux** | Clang++, `pkg-config`, `libglfw3-dev`, `libfreetype6-dev`, `libsqlite3-dev`, `libmysqlclient-dev`, `libcurl4-openssl-dev` |
+| **Windows**| Clang++ (MinGW-w64), GLFW3, Freetype, SQLite3, MySQL, Libcurl |
 
 #### macOS
 ```bash
@@ -29,7 +31,7 @@ brew install glfw freetype sqlite mysql-client
 
 #### Linux (Ubuntu/Debian)
 ```bash
-sudo apt-get install clang libglfw3-dev libfreetype6-dev libsqlite3-dev libmysqlclient-dev pkg-config
+sudo apt-get install clang libglfw3-dev libfreetype6-dev libsqlite3-dev libmysqlclient-dev libcurl4-openssl-dev pkg-config
 ```
 
 ### Building from Source
@@ -71,6 +73,14 @@ For detailed documentation, explore the files in the `DOCS/` directory:
 - [GUI Components](DOCS/gui.md): Building UIs with JSX-style components.
 - [Standard Library](DOCS/stdlib.md): Reference for built-in modules.
 - [Native Library Guide](DOCS/native_library_guide.md): Guide for extending Sunda with C++.
+
+## 📸 Screenshots
+
+### GUI Components
+![GUI Screenshot](screenshot_gui.jpeg)
+
+### Web Server
+![Web Server Screenshot](screenshot_webserver.jpeg)
 
 ## 🛠️ Development
 

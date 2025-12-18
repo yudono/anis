@@ -9,10 +9,10 @@ Sunda comes with built-in modules for common tasks.
 
 ## String Module
 ```javascript
-import { length, substr, contains } from "string";
+import { split, join, replace, concat, find, substring, str_length } from "string";
 
 var s = "Hello Sunda";
-println(s.length); // 11
+println(str_length(s)); // 11
 ```
 
 ## Array Module
@@ -60,6 +60,56 @@ const obj = json_parse('{"name": "Sunda", "stable": true}');
 println(obj.name); // Sunda
 ```
 
+### `http` Module
+Network requests using `libcurl`.
+
+#### Functions
+
+- `http(url, options)`: Dynamic request function. 
+  - `options`: Map containing `method` ("GET", "POST", etc.), `headers` (map), and `body` (string).
+- `http_get(url, options)`: Shortcut for GET.
+- `http_post(url, body, options)`: Shortcut for POST.
+- `http_put(url, body, options)`: Shortcut for PUT.
+- `http_patch(url, body, options)`: Shortcut for PATCH.
+- `http_delete(url, body, options)`: Shortcut for DELETE (body is optional).
+
+**Options Object:**
+```javascript
+{
+  method: "POST", // Optional for specific methods
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer token"
+  },
+  body: "payload here" // For http() function
+}
+```
+
+Example:
+```javascript
+import { http, http_get } from "http";
+
+// Dynamic request
+const res = http("https://api.example.com", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: '{"name": "test"}'
+});
+
+// Simple GET with headers
+const res2 = http_get("https://api.example.com/data", {
+    headers: { "Accept": "application/json" }
+});
+```
+
+### Remote Imports
+Sunda supports importing modules directly from the web.
+```javascript
+import { sayHello } from "https://example.com/scripts/hello.sd";
+sayHello("World");
+```
+*Note: The remote URL must serve valid Sunda source code.*
+
 ### `webserver` Module
 The `webserver` module provides a low-level TCP/IP server with a high-level API.
 
@@ -104,20 +154,16 @@ Regular expression operations.
 - `regex_search(str, pattern)`: Boolean search.
 - `regex_replace(str, pattern, replacement)`: Returns replaced string.
 
-## String Module
-```javascript
-import { split, join, replace, concat, find, substring } from "string";
 
 - `concat(a, b, ...)`: Concatenate multiple values into a string.
 - `find(str, search)`: Alias for `indexOf`. Returns the position of the first occurrence.
 - `substring(str, start, end)`: Extracts a part of a string.
 - `str_length(str)`: Returns the length of the string.
-
-```javascript
-import { concat, find, substring } from "string";
-const full = concat("Sunda", " ", "Runtime");
-const pos = find(full, "Runtime"); // 6
-```
+- `split(str, delimiter)`: Splits a string into an array.
+- `join(array, separator)`: Joins an array into a string.
+- `trim(str)`: Trims whitespace.
+- `toUpperCase(str)`: Convers to uppercase.
+- `toLowerCase(str)`: Convers to lowercase.
 
 ## Math Module
 ```javascript

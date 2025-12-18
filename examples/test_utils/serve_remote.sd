@@ -1,0 +1,12 @@
+import { WebServer_create } from "webserver";
+import { fs_readFile } from "fs";
+
+const app = WebServer_create();
+
+app.get("/test_function.sd", (c) => {
+    const content = fs_readFile("examples/test_utils/remote_script.sd");
+    return c.text(content);
+});
+
+println("Remote provider server starting on port 4000...");
+app.listen({ port: 4000 });

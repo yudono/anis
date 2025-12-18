@@ -377,19 +377,22 @@ std::shared_ptr<Expr> Parser::primary() {
                     spread->line = previous().line; // Line of '...'
                     props["__spread_" + std::to_string(spreadCounter++)] = spread;
                 } else {
-                    Token key = consume(TOK_IDENTIFIER, "Expect key.");
-                    
-                    if (match(TOK_COLON)) {
-                         std::shared_ptr<Expr> val = expression();
-                         props[key.text] = val;
+                    if (check(TOK_IDENTIFIER) || check(TOK_STRING)) {
+                        Token key = advance();
+                        
+                        if (match(TOK_COLON)) {
+                             std::shared_ptr<Expr> val = expression();
+                             props[key.text] = val;
+                        } else if (key.type == TOK_IDENTIFIER) {
+                             // Shorthand { key } -> { key: key }
+                             auto var = std::make_shared<VarExpr>(key.text);
+                             var->line = key.line;
+                             props[key.text] = var;
+                        } else {
+                             Debugger::parseError("Expect ':' after string key in object literal.", key.text, key.line);
+                        }
                     } else {
-                         // Shorthand { key } -> { key: key }
-                         auto var = std::make_shared<VarExpr>(key.text);
-                         var->line = key.line;
-                         props[key.text] = var;
-                         
-                         // If we don't have comma or brace, it might still be error, 
-                         // but loop check will handle it.
+                        consume(TOK_IDENTIFIER, "Expect key.");
                     }
                 }
             } while (match(TOK_COMMA));
