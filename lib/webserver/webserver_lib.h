@@ -23,9 +23,22 @@ class ServerInstance {
 public:
     std::vector<Route> routes;
     TCPServer server;
+    // Middleware
+    std::vector<Value> middlewares;
+    // Grouping
+    std::string currentPrefix = "";
 
     void add_route(std::string method, std::string path, Value handler) {
-        routes.push_back({method, path, handler});
+        std::string fullPath = currentPrefix + path;
+        // Fix double slashes slightly
+        if (currentPrefix.length() > 0 && currentPrefix.back() == '/' && path.length() > 0 && path[0] == '/') {
+            fullPath = currentPrefix + path.substr(1);
+        }
+        routes.push_back({method, fullPath, handler});
+    }
+
+    void use(Value middleware) {
+        middlewares.push_back(middleware);
     }
 
     void listen(int port, Interpreter& interpreter, std::string cert = "", std::string key = "") {
@@ -58,120 +71,191 @@ public:
 
         while (!g_interrupt) {
             TCPServer::Client client = server.accept_connection();
-            if (client.fd < 0) continue; // Timeout or error, loop back to check interrupt
+            if (client.fd < 0) continue; 
 
             std::string raw_req = server.read_request(client);
             if (raw_req.empty()) {
-                server.close_client(client);
-                continue;
+                 server.close_client(client);
+                 continue;
             }
 
             HttpRequest req = HTTPParser::parse(raw_req);
             
-            bool found = false;
-            for (auto& route : routes) {
-                if (route.method == req.method) {
-                    std::map<std::string, std::string> params;
-                    if (HTTPParser::match_route(route.path, req.path, params)) {
-                        // Create Context object for Sunda
-                        std::map<std::string, Value> ctx_map;
-                        
-                        // Context.req
-                        std::map<std::string, Value> req_map;
-                        req_map["path"] = Value(req.path, 0, false);
-                        req_map["method"] = Value(req.method, 0, false);
-                        req_map["body"] = Value(req.body, 0, false);
-                        
-                        // Context.req.param(name)
-                        req_map["param"] = Value([params](std::vector<Value> args) -> Value {
-                            if (args.empty()) return Value("undefined", 0, false);
-                            std::string p = args[0].strVal;
-                            if (params.count(p)) return Value(params.at(p), 0, false);
-                            return Value("undefined", 0, false);
-                        });
+            // Shared finish flag
+            auto handled = std::make_shared<bool>(false);
 
-                        // Context.req.header(name)
-                        req_map["header"] = Value([req](std::vector<Value> args) -> Value {
-                            if (args.empty()) return Value("undefined", 0, false);
-                            std::string h = args[0].strVal;
-                            if (req.headers.count(h)) return Value(req.headers.at(h), 0, false);
-                            return Value("undefined", 0, false);
-                        });
+            // Logic to run Router (last middleware)
+            std::function<void()> runRouter = [&, req, client, handled]() {
+                 bool found = false;
+                 for (auto& route : routes) {
+                    if (route.method == req.method) {
+                        std::map<std::string, std::string> params;
+                        if (HTTPParser::match_route(route.path, req.path, params)) {
+                            Value ctx = create_context(req, params, client, handled);
+                            std::vector<Value> args = { ctx };
+                            Value result = interpreter.callClosure(route.handler, args);
+                            if (!*handled) {
+                                server.send_response(client, result.toString());
+                                *handled = true;
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                 }
+                 if (!found && !*handled) {
+                     std::string body = "404 Not Found";
+                     std::string res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
+                     server.send_response(client, res);
+                     *handled = true;
+                 }
+            };
 
-                        // Context.req.json()
-                        req_map["json"] = Value([req](std::vector<Value> args) -> Value {
-                            JSONLib::JsonParser parser(req.body);
-                            return parser.parse();
-                        });
+            // Middleware Dispatch Chain
+            // Logic: dispatch(0) calls mw[0]. mw[0] receives next() which calls dispatch(1).
+            // If mw[0] doesn't call next(), chain stops.
+            // If i == size, call runRouter.
+            
+            // Note: std::function definition needed for recursion
+            std::function<void(size_t)> dispatch;
+            dispatch = [&](size_t i) {
+                if (*handled) return;
+                if (i >= middlewares.size()) {
+                    runRouter();
+                    return;
+                }
+                
+                std::map<std::string, std::string> no_params;
+                Value ctx = create_context(req, no_params, client, handled);
+                
+                // Add next() function
+                // Requires direct access to mapVal shared_ptr
+                if (ctx.isMap && ctx.mapVal) {
+                     (*ctx.mapVal)["next"] = Value([&, i](std::vector<Value> args) -> Value {
+                         dispatch(i + 1);
+                         return Value("", 0, false);
+                     });
+                }
 
-                        ctx_map["req"] = Value(req_map);
-
-                        // Context.text(str)
-                        ctx_map["text"] = Value([](std::vector<Value> args) -> Value {
-                            std::string body = args.empty() ? "" : args[0].toString();
-                            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
-                            return Value(res, 0, false);
-                        });
-
-                        // Context.json(obj)
-                        ctx_map["json"] = Value([](std::vector<Value> args) -> Value {
-                            std::string body = args.empty() ? "{}" : args[0].toJson();
-                            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
-                            return Value(res, 0, false);
-                        });
-
-                        // Context.html(str)
-                        ctx_map["html"] = Value([](std::vector<Value> args) -> Value {
-                            std::string body = args.empty() ? "" : args[0].toString();
-                            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
-                            return Value(res, 0, false);
-                        });
-
-                        // Context.header(contentType, body)
-                        ctx_map["response"] = Value([](std::vector<Value> args) -> Value {
-                            std::string type = args.size() > 0 ? args[0].strVal : "text/plain";
-                            std::string body = args.size() > 1 ? args[1].toString() : "";
-                            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: " + type + "\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
-                            return Value(res, 0, false);
-                        });
-
-                        // Call handler
-                        std::vector<Value> args = { Value(ctx_map) };
-                        Value result = interpreter.callClosure(route.handler, args);
-                        
-                        server.send_response(client, result.strVal);
-                        found = true;
-                        break;
+                std::vector<Value> args = { ctx };
+                try {
+                    interpreter.callClosure(middlewares[i], args);
+                } catch (const std::exception& e) {
+                    std::cerr << "Middleware error: " << e.what() << std::endl;
+                    if (!*handled) {
+                        std::string res = "HTTP/1.1 500 Internal Server Error\r\n\r\nMiddleware Error";
+                        server.send_response(client, res);
+                        *handled = true;
                     }
                 }
-            }
+            };
 
-            if (!found) {
-                std::string body = "404 Not Found";
-                std::string res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
-                server.send_response(client, res);
-            }
-
+            dispatch(0);
             server.close_client(client);
         }
     }
+
+    Value create_context(HttpRequest req, std::map<std::string, std::string> params, TCPServer::Client client, std::shared_ptr<bool> handled) {
+        std::map<std::string, Value> ctx_map;
+        std::map<std::string, Value> req_map;
+        req_map["path"] = Value(req.path, 0, false);
+        req_map["method"] = Value(req.method, 0, false);
+        req_map["body"] = Value(req.body, 0, false);
+        req_map["param"] = Value([params](std::vector<Value> args) -> Value {
+            if (args.empty()) return Value("undefined", 0, false);
+            std::string p = args[0].strVal;
+            if (params.count(p)) return Value(params.at(p), 0, false);
+             return Value("undefined", 0, false);
+        });
+        
+        // Context.req.params object
+        std::map<std::string, Value> params_obj;
+        for (auto const& [key, val] : params) {
+            params_obj[key] = Value(val, 0, false);
+        }
+        req_map["params"] = Value(params_obj);
+
+        req_map["header"] = Value([req](std::vector<Value> args) -> Value {
+             if (args.empty()) return Value("undefined", 0, false);
+             std::string h = args[0].strVal;
+             // Headers are typically case-insensitive but for simplicity direct match
+             if (req.headers.count(h)) return Value(req.headers.at(h), 0, false);
+              return Value("undefined", 0, false);
+        });
+        req_map["json"] = Value([req](std::vector<Value> args) -> Value {
+             JSONLib::JsonParser parser(req.body);
+             return parser.parse();
+        });
+        ctx_map["req"] = Value(req_map);
+
+        auto send_res = [this, client, handled](const std::string& res) {
+            if (!*handled) {
+                server.send_response(client, res);
+                *handled = true;
+            }
+        };
+
+        ctx_map["text"] = Value([send_res](std::vector<Value> args) -> Value {
+            std::string body = args.empty() ? "" : args[0].toString();
+            std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
+            send_res(res);
+            return Value(res, 0, false); // For chaining if needed, but mainly side-effect
+        });
+        ctx_map["json"] = Value([send_res](std::vector<Value> args) -> Value {
+             std::string body = args.empty() ? "{}" : args[0].toJson();
+             std::string res = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
+             send_res(res);
+             return Value(res, 0, false);
+        });
+        ctx_map["html"] = Value([send_res](std::vector<Value> args) -> Value {
+             std::string body = args.empty() ? "" : args[0].toString();
+             std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + std::to_string(body.length()) + "\r\n\r\n" + body;
+             send_res(res);
+             return Value(res, 0, false);
+        });
+        ctx_map["status"] = Value([ctx_map](std::vector<Value> args) -> Value {
+             // Mock status chaining
+             return Value(ctx_map);
+        });
+
+        return Value(ctx_map);
+    }
 };
 
-// Singleton manager for multiple server instances if needed, but usually one is fine.
 static std::vector<std::shared_ptr<ServerInstance>> g_servers;
 
 void register_webserver(Interpreter& interpreter) {
-    // Special hack for listen since it needs interpreter
     static Interpreter* s_interpreter = &interpreter; 
     
     interpreter.registerNative("Webserver", [](std::vector<Value> args) -> Value {
-        std::cout << "[DEBUG] Webserver() called" << std::endl;
         auto instance = std::make_shared<ServerInstance>();
         g_servers.push_back(instance);
-        std::cout << "[DEBUG] ServerInstance created" << std::endl;
         
         std::map<std::string, Value> server_obj;
         
+        server_obj["use"] = Value([instance](std::vector<Value> args) -> Value {
+            if (args.empty()) return Value("", 0, false);
+            instance->use(args[0]);
+            return Value("", 1, true);
+        });
+
+        // Group Implementation
+        server_obj["group"] = Value([instance](std::vector<Value> args) -> Value {
+             if (args.size() < 2) return Value("", 0, false);
+             std::string prefix = args[0].strVal;
+             Value callback = args[1];
+
+             std::string oldPrefix = instance->currentPrefix;
+             instance->currentPrefix += prefix;
+             
+             // Run callback
+             std::vector<Value> cbArgs;
+             s_interpreter->callClosure(callback, cbArgs);
+
+             instance->currentPrefix = oldPrefix;
+             return Value("", 1, true); 
+        });
+
         server_obj["get"] = Value([instance](std::vector<Value> args) -> Value {
             if (args.size() < 2) return Value("", 0, false);
             instance->add_route("GET", args[0].strVal, args[1]);

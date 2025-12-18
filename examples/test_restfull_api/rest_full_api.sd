@@ -10,6 +10,8 @@ if (!connected) {
     // throw new Error("DB Connection Failed"); // If throw is supported
 }
 println("Connected to DB at " + dbPath);
+if (!connected) println("Failed to connect to DB");
+else println("Connected to DB at " + dbPath);
 
 // 2. Setup Tables
 db_execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)");
@@ -17,121 +19,129 @@ db_execute("CREATE TABLE IF NOT EXISTS tokens (token TEXT PRIMARY KEY, user_id I
 
 // 3. Setup Webserver
 const app = Webserver();
-const PORT = 8080;
-// If env("PORT") returns string, implicit conversion might happen or we need Number().
-// For now, let's hardcode or just use simple OR if supported for types. 
-// const PORT = env("PORT") || 8080; 
+const PORT = 8081;
+
+// Middleware 1: Logger
+app.use((c) => {
+    println("[" + c.req.method + "] " + c.req.path);
+    c.next();
+});
+
+// Middleware 2: Global Headers
+app.use((c) => {
+    // We can't set response headers in this simple version yet effectively without response object, 
+    // but we can proceed.
+    c.next();
+});
 
 // Helper: Generate Token
+var tokenCounter = 0;
 function generateToken() {
-    return "tk_" + Date.now();
+    tokenCounter = tokenCounter + 1;
+    return "tk_" + ("" + tokenCounter);
 }
 
-// Routes
+// 4. API Routes (Grouped)
+app.group("/api/v1", () => {
 
-// POST /register
-app.post("/register", (c) => {
-    try {
-        const body = c.req.json();
-        if (!body.username || !body.password) {
-            return c.json({ error: "Missing username or password" });
-        }
+    // Auth Group
+    app.group("/auth", () => {
+        app.post("/register", (c) => {
+            try {
+                const body = c.req.json();
+                if (!body.username || !body.password) return c.json({ error: "Missing data" });
 
-        // Check if user exists
-        const exists = db_query("SELECT id FROM users WHERE username = ?", [body.username]);
-        if (exists.length > 0) {
-            return c.json({ error: "User already exists" });
-        }
+                const exists = db_query("SELECT id FROM users WHERE username = ?", [body.username]);
+                if (exists.length > 0) return c.json({ error: "User exists" });
 
-        delay(500); // Simulate hashing cost
+                delay(200); // Hashing
+                db_execute("INSERT INTO users (username, password) VALUES (?, ?)", [body.username, body.password]);
+                return c.json({ message: "User created" });
+            } catch (e) {
+                console.error("Reg Error: " + e.message);
+                return c.json({ error: "Internal Error" });
+            }
+        });
 
-        db_execute("INSERT INTO users (username, password) VALUES (?, ?)", [body.username, body.password]);
-        return c.json({ message: "User created" });
+        app.post("/login", (c) => {
+            try {
+                const body = c.req.json();
+                const users = db_query("SELECT id, password FROM users WHERE username = ?", [body.username]);
 
-    } catch (e) {
-        console.error("Register Error: " + e.message);
-        return c.json({ error: "Internal Server Error" });
-    }
-});
+                if (users.length == 0 || users[0].password != body.password) {
+                    delay(200); return c.json({ error: "Invalid credentials" });
+                }
 
-// POST /login
-app.post("/login", (c) => {
-    try {
-        const body = c.req.json();
-        const users = db_query("SELECT id, password FROM users WHERE username = ?", [body.username]);
-
-        // Validate
-        if (users.length == 0) {
-            delay(200); return c.json({ error: "Invalid credentials" });
-        }
-
-        const user = users[0];
-        if (user.password != body.password) {
-            delay(200); return c.json({ error: "Invalid credentials" });
-        }
-
-        const token = generateToken();
-        db_execute("INSERT INTO tokens (token, user_id) VALUES (?, ?)", [token, user.id]);
-
-        return c.json({ token: token });
-
-    } catch (e) {
-        console.error("Login Error: " + e.message);
-        return c.json({ error: "Internal Error" });
-    }
-});
-
-// Helper for Auth Check (since no middleware support visible)
-function getAuthUser(c) {
-    const authHeader = c.req.header("Authorization");
-    if (!authHeader) return null;
-
-    // Manual string replace or substring if replace not available on string?
-    // String lib has replace coming? Assuming generic string usage or manual slice.
-    // "Bearer " is 7 chars.
-    // Let's assume standard string methods or just use what we have.
-    // Safe bet: just query exact check or naive parsing
-    // const token = authHeader.replace("Bearer ", ""); 
-
-    // Fallback if replace missing: 
-    // var token = authHeader;
-    // ...
-    // Let's try matching. 
-    // Assuming token is passed directly or we parse.
-    // For simplicity of this example, let's assume client sends just the token or we handle "Bearer " substring if exists.
-
-    // Using string substring if available? 
-    // Sunda `string` lib likely has it.
-
-    const token = authHeader; // Simplification: Client sends "Bearer token" or just "token". 
-    // We will query DB.
-
-    // NOTE: In real world, strip prefix.
-
-    const session = db_query("SELECT user_id FROM tokens WHERE token = ? OR token = ?", [token, token.replace("Bearer ", "")]);
-    if (session.length == 0) return null;
-    return session[0].user_id;
-}
-
-// GET /profile (Protected)
-app.get("/profile", (c) => {
-    const userId = getAuthUser(c);
-    if (!userId) {
-        return c.json({ error: "Unauthorized" });
-    }
-
-    const users = db_query("SELECT username FROM users WHERE id = ?", [userId]);
-    if (users.length == 0) return c.json({ error: "User Not Found" });
-
-    return c.json({
-        id: userId,
-        username: users[0].username,
-        message: "This is protected data"
+                const token = generateToken();
+                db_execute("INSERT INTO tokens (token, user_id) VALUES (?, ?)", [token, users[0].id]);
+                return c.json({ token: token });
+            } catch (e) {
+                console.error("Login Error: " + e.message);
+                return c.json({ error: "Internal Error" });
+            }
+        });
     });
+
+    // Protected User Routes (Dynamic)
+    app.group("/user", () => {
+        app.get("/profile/:id", (c) => {
+            const auth = c.req.header("Authorization");
+            if (!auth) return c.json({ error: "Unauthorized" });
+
+            // Simulating Token Validation (In real app, parse/verify)
+            const token = auth;
+            const session = db_query("SELECT user_id FROM tokens WHERE token = ?", [token]);
+            if (session.length == 0) return c.json({ error: "Invalid Token" });
+
+            // Check requested ID from params
+            const reqId = c.req.params.id; // Corrected: access params object
+
+            // Allow if admin or same user? For now just return public info.
+            // Or typically /user/:id is public profile.
+            // But let's verify exists.
+
+            const users = db_query("SELECT id, username FROM users WHERE id = ?", [reqId]);
+            if (users.length == 0) return c.json({ error: "User Not Found" });
+
+            return c.json({
+                id: users[0].id,
+                username: users[0].username,
+                message: "Public Profile Data for User " + reqId
+            });
+        });
+
+        // Current User Profile
+        app.get("/profile", (c) => {
+            const auth = c.req.header("Authorization");
+            if (!auth) return c.json({ error: "Unauthorized" });
+
+            const session = db_query("SELECT user_id FROM tokens WHERE token = ?", [auth]);
+            if (session.length == 0) return c.json({ error: "Invalid Token" });
+
+            const userId = session[0].user_id;
+            const user = db_query("SELECT username FROM users WHERE id = ?", [userId]);
+
+            return c.json({
+                id: userId,
+                username: user[0].username,
+                message: "Protected Profile Data"
+            });
+        });
+    });
+
+    // Multi-Layer & Multi-Param Demonstration
+    app.group("/test", () => {
+        app.get("/deep/:category/:id", (c) => {
+            return c.json({
+                message: "Deep Route Hit",
+                category: c.req.params.category,
+                id: c.req.params.id,
+                full_path: c.req.path
+            });
+        });
+    });
+
 });
 
 println("Starting server on port " + PORT + "...");
-// Simulate startup delay
-delay(1000);
-
 app.listen({ port: PORT });

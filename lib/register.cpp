@@ -134,4 +134,60 @@ void register_std_libs(Interpreter& interpreter) {
         
         return Value("", 0, false); 
     });
+
+    // Number() - Convert to number
+    interpreter.registerNative("Number", [](std::vector<Value> args) -> Value {
+        if (args.empty()) return Value("", 0, true); // Number() = 0
+        
+        Value v = args[0];
+        
+        // Already a number
+        if (v.isInt) return v;
+        
+        // Boolean to number
+        if (v.strVal == "true") return Value("", 1, true);
+        if (v.strVal == "false") return Value("", 0, true);
+        
+        // String to number
+        if (!v.isInt) {
+            try {
+                int num = std::stoi(v.strVal);
+                return Value("", num, true);
+            } catch (...) {
+                return Value("", 0, true); // NaN equivalent = 0
+            }
+        }
+        
+        return Value("", 0, true);
+    });
+
+    // String() - Convert to string
+    interpreter.registerNative("String", [](std::vector<Value> args) -> Value {
+        if (args.empty()) return Value("", 0, false);
+        
+        Value v = args[0];
+        
+        // Use built-in toString() method
+        return Value(v.toString(), 0, false);
+    });
+
+    // Boolean() - Convert to boolean
+    interpreter.registerNative("Boolean", [](std::vector<Value> args) -> Value {
+        if (args.empty()) return Value("false", 0, false);
+        
+        Value v = args[0];
+        
+        // Number to boolean
+        if (v.isInt) {
+            return Value(v.intVal != 0 ? "true" : "false", 0, false);
+        }
+        
+        // String to boolean (empty string = false, others = true)
+        if (!v.isInt) {
+            bool isTruthy = !v.strVal.empty() && v.strVal != "false" && v.strVal != "0";
+            return Value(isTruthy ? "true" : "false", 0, false);
+        }
+        
+        return Value("false", 0, false);
+    });
 }

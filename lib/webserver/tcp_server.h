@@ -105,11 +105,12 @@ public:
             return false;
         }
         
-        // Set receive timeout for accept to allow periodic interrupt check
+        // Set receive timeout for accept and read
         struct timeval tv;
-        tv.tv_sec = 0;
-        tv.tv_usec = 500000; // 500ms
+        tv.tv_sec = 5;
+        tv.tv_usec = 0;
         setsockopt(server_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+        setsockopt(server_fd, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
 
         if (listen(server_fd, 10) < 0) {
             close(server_fd);
@@ -152,17 +153,49 @@ public:
     }
 
     std::string read_request(Client client) {
-        char buffer[4096] = {0};
+        std::string raw_req;
+        char buffer[4096];
         int valread = 0;
         
-        if (client.ssl) {
-             valread = SSL_read(client.ssl, buffer, sizeof(buffer));
-        } else {
-             valread = read(client.fd, buffer, sizeof(buffer));
+        // 1. Read Headers
+        while (true) {
+            memset(buffer, 0, sizeof(buffer));
+            if (client.ssl) valread = SSL_read(client.ssl, buffer, sizeof(buffer) - 1);
+            else valread = read(client.fd, buffer, sizeof(buffer) - 1);
+
+            if (valread <= 0) break; 
+            raw_req.append(buffer, valread);
+            
+            if (raw_req.find("\r\n\r\n") != std::string::npos) break;
         }
         
-        if (valread <= 0) return "";
-        return std::string(buffer, valread);
+        // 2. Parse Content-Length
+        size_t header_end = raw_req.find("\r\n\r\n");
+        if (header_end != std::string::npos) {
+            std::string headers = raw_req.substr(0, header_end);
+            size_t cl_pos = headers.find("Content-Length: ");
+            if (cl_pos != std::string::npos) {
+                size_t start = cl_pos + 16;
+                size_t end = headers.find("\r\n", start);
+                int content_len = std::stoi(headers.substr(start, end - start));
+                
+                // 3. Read Remaining Body
+                int body_received = raw_req.length() - (header_end + 4);
+                int to_read = content_len - body_received;
+                
+                while (to_read > 0) {
+                     memset(buffer, 0, sizeof(buffer));
+                     if (client.ssl) valread = SSL_read(client.ssl, buffer, sizeof(buffer) - 1);
+                     else valread = read(client.fd, buffer, sizeof(buffer) - 1);
+                     
+                     if (valread <= 0) break;
+                     raw_req.append(buffer, valread);
+                     to_read -= valread;
+                }
+            }
+        }
+        
+        return raw_req;
     }
     
     void send_response(Client client, const std::string& response) {
