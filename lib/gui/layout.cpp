@@ -85,7 +85,7 @@ Vec2 measure_node(const Node& n, float constraintsW, float constraintsH) {
         std::string rawTxt = trim(n.text);
         std::string txt = resolve_binding(rawTxt);
         
-        float sizeScale = 1.0f;
+        float sizeScale = 1.75f; // Default 28px for Text
         if (n.attrs.count("fontSize")) {
              float px = parse_dim(n.attrs.at("fontSize"), 100, 16);
              sizeScale = px / 16.0f; 
@@ -113,7 +113,7 @@ Vec2 measure_node(const Node& n, float constraintsW, float constraintsH) {
         if (!n.text.empty()) {
              std::string txt = trim(n.text);
              if (!txt.empty()) {
-                 float scale = 1.0f;
+                 float scale = 1.5f; // Default 24px for Button
                  if (n.attrs.count("fontSize")) {
                      float px = parse_dim(n.attrs.at("fontSize"), 100, 16);
                      scale = px / 16.0f; 
@@ -197,8 +197,8 @@ void render_node(const Node& n, float x, float& y, double mx, double my, bool cl
     if (n.tag == "Button") textCol = {1,1,1,1}; // Default white for button
     if (n.attrs.count("color")) textCol = parse_color(n.attrs.at("color"));
     
-
-    float sizeScale = 1.0f;
+    // Default font sizes: Text=28px (1.75x), Button=24px (1.5x)
+    float sizeScale = (n.tag == "Button") ? 1.5f : 1.75f;
     if (n.attrs.count("fontSize")) {
          float px = parse_dim(n.attrs.at("fontSize"), 100, 16);
          sizeScale = px / 16.0f; 

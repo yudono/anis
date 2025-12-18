@@ -547,7 +547,7 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
         
         if (obj.isMap && obj.mapVal) {
             if (obj.mapVal->count(key)) return (*obj.mapVal)[key];
-            return {"undefined", 0, false};
+            return {"", 0, false}; // Return empty string instead of "undefined"
         }
         if (obj.isList && obj.listVal) {
              // Array Properties
