@@ -12,6 +12,7 @@
 #include "array/array.h"
 #include "map/map.h"
 #include "database/database_lib.h"
+#include "webserver/webserver_lib.h"
 #include "register.h"
 
 // Forward declare GUI registration if it's still in sunda.cpp or move it?
@@ -39,4 +40,7 @@ void register_std_libs(Interpreter& interpreter) {
 
     // Database
     DatabaseLib::register_db(interpreter);
+
+    // WebServer
+    WebServer::register_webserver(interpreter);
 }

@@ -1,0 +1,22 @@
+// Web Server Verification Script (Hono-like API)
+import { WebServer_create } from "webserver";
+
+// Factory function for "Server" (Hono-like wrapper)
+function Server() {
+    const s = WebServer_create();
+    return s;
+}
+
+const app = Server();
+
+app.get("/", (c) => {
+    return c.text("Hello World!");
+});
+
+app.get("/hello/:name", (c) => {
+    const name = c.req.param("name");
+    return c.text("Hello, " + name + "!");
+});
+
+println("Server running on http://localhost:3000");
+app.listen({ port: 3000 });

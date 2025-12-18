@@ -48,6 +48,28 @@ db_execute("INSERT INTO users (name) VALUES (?)", ["Yudono"]);
 const users = db_query("SELECT * FROM users");
 ```
 
+### `webserver` Module
+The `webserver` module provides a low-level TCP/IP server with a high-level API.
+
+- `WebServer_create()`: Creates a new server instance.
+  - `app.get(path, handler)`: Registers a GET route. Supports `:param` syntax.
+  - `app.listen({ port })`: Starts the server.
+- `c.text(body)`: Helper to send a plain text response.
+- `c.req.param(name)`: Returns the value of a URL parameter.
+
+Example (Hono-like):
+```javascript
+import { WebServer_create } from "webserver";
+const app = WebServer_create();
+
+app.get("/hello/:name", (c) => {
+  const name = c.req.param("name");
+  return c.text("Hello, " + name);
+});
+
+app.listen({ port: 3000 });
+```
+
 ## Math Module
 ```javascript
 import { sin, cos, random, floor } from "math";
