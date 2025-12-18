@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <regex>
+#include <cstring>
 
 namespace Database {
 
