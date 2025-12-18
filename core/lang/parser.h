@@ -210,6 +210,21 @@ struct ClassStmt : Stmt {
     ClassStmt(std::string n, std::string s = "") : name(n), superclass(s) {}
 };
 
+struct TryStmt : Stmt {
+    std::shared_ptr<BlockStmt> tryBlock;
+    std::shared_ptr<BlockStmt> catchBlock;
+    std::shared_ptr<BlockStmt> finallyBlock;
+    std::string catchVar;
+
+    TryStmt(std::shared_ptr<BlockStmt> tryB, std::shared_ptr<BlockStmt> catchB, std::shared_ptr<BlockStmt> finalB, std::string cVar)
+        : tryBlock(tryB), catchBlock(catchB), finallyBlock(finalB), catchVar(cVar) {}
+};
+
+struct ThrowStmt : Stmt {
+    std::shared_ptr<Expr> expression;
+    ThrowStmt(std::shared_ptr<Expr> expr) : expression(expr) {}
+};
+
 class Parser {
     std::vector<Token> tokens;
     size_t current = 0;

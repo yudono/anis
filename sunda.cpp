@@ -13,7 +13,25 @@
 #include "lib/gui/layout.h"
 #include "lib/register.h"
 #include <curl/curl.h>
+#include <curl/curl.h>
 #include <csignal>
+#include <atomic>
+#include <execinfo.h>
+#include <unistd.h>
+
+// crash handler
+void crash_handler(int sig) {
+  void *array[10];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 10);
+
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, STDERR_FILENO);
+  exit(1);
+}
 #include <atomic>
 
 // Global interrupt flag
@@ -145,6 +163,7 @@ int runFile(std::string filePath, bool dumpTokens) {
 }
 
 int main(int argc, char* argv[]) {
+    signal(SIGSEGV, crash_handler);
     signal(SIGINT, signal_handler);
     curl_global_init(CURL_GLOBAL_ALL);
 

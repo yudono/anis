@@ -161,4 +161,11 @@ private:
 
 };
 
+
+// Exception Support
+struct RuntimeError : public std::runtime_error {
+    Value value; // The thrown value (can be string or Error object)
+    RuntimeError(Value v) : std::runtime_error(v.toString()), value(v) {}
+};
+
 #endif

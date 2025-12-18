@@ -20,7 +20,10 @@ enum TokenType {
     
     // OOP Keywords
     TOK_CLASS, TOK_NEW, TOK_EXTENDS, TOK_SUPER, TOK_STATIC, TOK_GET, TOK_SET, TOK_THIS,
-    TOK_PRIVATE_IDENTIFIER // #field
+    TOK_PRIVATE_IDENTIFIER, // #field
+
+    // Exception Handling
+    TOK_TRY, TOK_CATCH, TOK_FINALLY, TOK_THROW
 };
 
 struct Token {

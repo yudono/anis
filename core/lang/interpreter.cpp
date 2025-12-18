@@ -75,7 +75,7 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
 
     if (auto imp = std::dynamic_pointer_cast<ImportStmt>(stmt)) {
         // JIT Loading
-        // std::cout << "[JIT] Loading module: " << imp->moduleName << std::endl;
+        std::cout << "[DEBUG] Loading module: " << imp->moduleName << std::endl;
         
         if (imp->moduleName == "gui" || imp->moduleName == "math" || imp->moduleName == "string" || 
             imp->moduleName == "array" || imp->moduleName == "map" || imp->moduleName == "db" || 
@@ -310,6 +310,27 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
         
         environment->assign(classStmt->name, Value(klass));
     }
+    else if (auto tryStmt = std::dynamic_pointer_cast<TryStmt>(stmt)) {
+        try {
+            executeBlock(tryStmt->tryBlock, std::make_shared<Environment>(environment));
+        } catch (RuntimeError& e) {
+            if (tryStmt->catchBlock) {
+                // Create scope for catch
+                auto catchEnv = std::make_shared<Environment>(environment);
+                // Bind error
+                catchEnv->define(tryStmt->catchVar, e.value);
+                executeBlock(tryStmt->catchBlock, catchEnv);
+            }
+        }
+        
+        if (tryStmt->finallyBlock) {
+            executeBlock(tryStmt->finallyBlock, std::make_shared<Environment>(environment));
+        }
+    }
+    else if (auto throwStmt = std::dynamic_pointer_cast<ThrowStmt>(stmt)) {
+        Value val = evaluate(throwStmt->expression);
+        throw RuntimeError(val);
+    }
     else if (auto exprStmt = std::dynamic_pointer_cast<ExprStmt>(stmt)) {
         lastExpressionValue = evaluate(exprStmt->expr);
         hasLastExpressionValue = true;
@@ -408,6 +429,16 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
     }
     if (auto n = std::dynamic_pointer_cast<NewExpr>(expr)) {
          Value val = getVar(n->className);
+         
+         // Allow calling native functions with new (e.g. Error)
+         if (val.isNative) {
+              std::vector<Value> args;
+              for (auto& arg : n->args) {
+                  args.push_back(evaluate(arg));
+              }
+              return val.nativeFunc(args);
+         }
+
          if (!val.isClass || !val.classVal) {
              Debugger::runtimeError("Operands must be a class.", n->line);
          }

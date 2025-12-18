@@ -165,8 +165,10 @@ void register_webserver(Interpreter& interpreter) {
     static Interpreter* s_interpreter = &interpreter; 
     
     interpreter.registerNative("Webserver", [](std::vector<Value> args) -> Value {
+        std::cout << "[DEBUG] Webserver() called" << std::endl;
         auto instance = std::make_shared<ServerInstance>();
         g_servers.push_back(instance);
+        std::cout << "[DEBUG] ServerInstance created" << std::endl;
         
         std::map<std::string, Value> server_obj;
         

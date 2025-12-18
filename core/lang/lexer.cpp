@@ -41,6 +41,10 @@ std::vector<Token> Lexer::tokenize() {
             else if (ident == "this") addToken(TOK_THIS, ident);
             else if (ident == "get") addToken(TOK_GET, ident);
             else if (ident == "set") addToken(TOK_SET, ident);
+            else if (ident == "try") addToken(TOK_TRY, ident);
+            else if (ident == "catch") addToken(TOK_CATCH, ident);
+            else if (ident == "finally") addToken(TOK_FINALLY, ident);
+            else if (ident == "throw") addToken(TOK_THROW, ident);
             else addToken(TOK_IDENTIFIER, ident);
         } else if (isdigit(c)) {
             // ...

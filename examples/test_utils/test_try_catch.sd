@@ -1,0 +1,15 @@
+function checkNumber(num) {
+    if (num < 0) {
+        throw new Error('Number must be positive!');
+    }
+    return num;
+}
+
+try {
+    const result = checkNumber(-5);
+    logger.info('Result:', result);
+} catch (err) {
+    logger.error('Caught an exception:', err.message);
+} finally {
+    logger.info('This block always runs, cleanup or final actions here.');
+}

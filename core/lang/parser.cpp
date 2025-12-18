@@ -222,6 +222,48 @@ std::shared_ptr<Stmt> Parser::statement() {
         std::shared_ptr<Stmt> body = statement();
         return std::make_shared<WhileStmt>(condition, body);
     }
+    if (match(TOK_THROW)) {
+        std::shared_ptr<Expr> expr = expression();
+        consume(TOK_SEMICOLON, "Expect ';' after throw value.");
+        return std::make_shared<ThrowStmt>(expr);
+    }
+    if (match(TOK_TRY)) {
+        consume(TOK_LBRACE, "Expect '{' after try.");
+        std::shared_ptr<BlockStmt> tryBlock = std::make_shared<BlockStmt>();
+        while (!check(TOK_RBRACE) && !isAtEnd()) {
+            tryBlock->statements.push_back(declaration());
+        }
+        consume(TOK_RBRACE, "Expect '}' after try block.");
+        
+        std::shared_ptr<BlockStmt> catchBlock = nullptr;
+        std::string catchVar = "";
+        std::shared_ptr<BlockStmt> finallyBlock = nullptr;
+        
+        if (match(TOK_CATCH)) {
+            consume(TOK_LPAREN, "Expect '(' after catch.");
+            Token name = consume(TOK_IDENTIFIER, "Expect catch variable name.");
+            catchVar = name.text;
+            consume(TOK_RPAREN, "Expect ')' after catch variable.");
+            
+            consume(TOK_LBRACE, "Expect '{' before catch block.");
+            catchBlock = std::make_shared<BlockStmt>();
+            while (!check(TOK_RBRACE) && !isAtEnd()) {
+                catchBlock->statements.push_back(declaration());
+            }
+            consume(TOK_RBRACE, "Expect '}' after catch block.");
+        }
+        
+        if (match(TOK_FINALLY)) {
+            consume(TOK_LBRACE, "Expect '{' before finally block.");
+            finallyBlock = std::make_shared<BlockStmt>();
+            while (!check(TOK_RBRACE) && !isAtEnd()) {
+                finallyBlock->statements.push_back(declaration());
+            }
+            consume(TOK_RBRACE, "Expect '}' after finally block.");
+        }
+        
+        return std::make_shared<TryStmt>(tryBlock, catchBlock, finallyBlock, catchVar);
+    }
     if (match(TOK_SWITCH)) {
         consume(TOK_LPAREN, "Expect '(' after switch.");
         std::shared_ptr<Expr> condition = expression();
