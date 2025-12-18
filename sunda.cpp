@@ -16,14 +16,19 @@
 // Define global appState needed by minigui
 AppState appState;
 
+// Define static member of Debugger
+bool Debugger::isReplMode = false;
+
 void printHelp() {
     std::cout << COLOR_CYAN << "Sunda Programming Language" << COLOR_RESET << std::endl;
     std::cout << std::endl;
     std::cout << COLOR_GREEN << "USAGE:" << COLOR_RESET << std::endl;
+    std::cout << "  sunda                        Enter REPL mode" << std::endl;
     std::cout << "  sunda <file.sd>              Run a Sunda script" << std::endl;
     std::cout << "  sunda --help                 Show this help message" << std::endl;
     std::cout << std::endl;
     std::cout << COLOR_GREEN << "EXAMPLES:" << COLOR_RESET << std::endl;
+    std::cout << "  sunda                        Start interactive shell" << std::endl;
     std::cout << "  sunda examples/hello.sd      Run hello.sd" << std::endl;
     std::cout << "  sunda myapp/main.sd          Run GUI application" << std::endl;
     std::cout << std::endl;
@@ -37,11 +42,49 @@ void printHelp() {
     std::cout << std::endl;
 }
 
+void runREPL() {
+    Debugger::isReplMode = true;
+    Interpreter interpreter;
+    register_std_libs(interpreter);
+
+    std::cout << COLOR_CYAN << "Sunda REPL (v1.0.0)" << COLOR_RESET << std::endl;
+    std::cout << "Type 'exit' to quit." << std::endl;
+
+    std::string line;
+    while (true) {
+        std::cout << COLOR_GREEN << "sunda> " << COLOR_RESET;
+        if (!std::getline(std::cin, line) || line == "exit") break;
+        if (line.empty()) continue;
+
+        try {
+            // 1. Lex
+            Lexer lexer(line);
+            std::vector<Token> tokens = lexer.tokenize();
+
+            // 2. Parse
+            Parser parser(tokens);
+            std::vector<std::shared_ptr<Stmt>> statements = parser.parse();
+
+            // 3. Interpret
+            interpreter.sourceCode = line;
+            interpreter.hasLastExpressionValue = false; // Reset before run
+            interpreter.interpret(statements);
+            
+            if (interpreter.hasLastExpressionValue) {
+                std::cout << COLOR_BLUE << "=> " << COLOR_RESET << interpreter.lastExpressionValue.toString() << std::endl;
+            }
+        } catch (const std::exception& e) {
+            // Error already printed by Debugger if it didn't exit
+        } catch (...) {
+            std::cerr << "Unknown error occurred" << std::endl;
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        Debugger::error("No input file specified", "", 0);
-        std::cerr << "Run 'sunda --help' for usage information" << std::endl;
-        return 1;
+        runREPL();
+        return 0;
     }
     
     std::string arg = argv[1];

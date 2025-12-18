@@ -1,40 +1,81 @@
-# C++ Mini-GUI Dashboard
+# 🏝️ Sunda Programming Language
 
-A custom, lightweight UI engine built with C++ and GLFW. Features an XML-like DSL for layout, Flexbox-style positioning (`Row`, `Column`), and smooth text rendering via FreeType.
+Sunda is a modern, lightweight, and cross-platform programming language built in C++. It features a JavaScript-like syntax, a built-in GUI library with JSX-style layout, and an interactive REPL.
 
-## Prerequisites
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### macOS
-1.  **Install Homebrew** (if not installed):
-    ```bash
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    ```
-2.  **Install Library Dependencies**:
-    ```bash
-    brew install glfw freetype
-    ```
+## ✨ Key Features
 
-## Build Instructions
+- **Standard Syntax**: JavaScript-like syntax with support for arrow functions, object spread, and destructuring.
+- **Built-in GUI**: Create desktop applications using JSX-like components (`<Row>`, `<Column>`, `<Button>`, etc.).
+- **REPL**: Interactive shell for quick prototyping and testing.
+- **Cross-Platform**: Support for macOS, Linux, and Windows.
+- **Single Binary**: Compiles to a self-contained executable with no heavy runtime dependencies.
 
-The project uses a standard `Makefile` configuration.
+## 🚀 Installation
 
-1.  **Open Terminal** in the project directory.
-2.  **Run Build**:
-    ```bash
-    make
-    ```
-    This will compile `main.cpp` using `clang++` and link against GLFW and FreeType.
+### Prerequisites
 
-## How to Run
+| OS | Requirements |
+|---|---|
+| **macOS** | Clang++, GLFW, Freetype (via Homebrew) |
+| **Linux** | Clang++, `pkg-config`, `libglfw3-dev`, `libfreetype6-dev` |
+| **Windows**| Clang++ (MinGW-w64), GLFW3, Freetype |
 
-After building, an executable named `dashboard` is created in the `build/` directory.
-
+#### macOS
 ```bash
-./build/dashboard
+brew install glfw freetype
 ```
 
-## Features
-- **XML Layout**: Edit the XML string in `main.cpp` to change the UI without touching C++ rendering logic.
-- **Flexbox Layout**: Use `<Row>` and `<Column>` with attributes like `justifyContent="center"` or `alignItems="right"`.
-- **Scrolling**: Use `<Scrollview>` containers for content larger than the window.
-- **Responsive**: Use `%` (e.g., `width="50%"`) or `px` (e.g., `width="200px"`) for sizing.
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt-get install clang libglfw3-dev libfreetype6-dev pkg-config
+```
+
+### Building from Source
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yudono/sunda.git
+   cd sunda
+   ```
+
+2. Build the project:
+   ```bash
+   make
+   ```
+
+3. The binary will be available at `bin/sunda`.
+
+## 📖 Usage
+
+### Running a Script
+```bash
+./bin/sunda examples/test_syntax/test_hello_world.sd
+```
+
+### Interactive REPL
+Simply run the binary without arguments:
+```bash
+./bin/sunda
+```
+
+### Help & Documentation
+```bash
+./bin/sunda --help
+```
+
+For detailed documentation, explore the files in the `DOCS/` directory:
+- [Getting Started](DOCS/getting_started.md): Installation and first steps.
+- [Language Syntax](DOCS/syntax.md): Syntax, variables, and control flow.
+- [GUI Components](DOCS/gui.md): Building UIs with JSX-style components.
+- [Standard Library](DOCS/stdlib.md): Reference for built-in modules.
+
+## 🛠️ Development
+
+- **Build Output**: Object files are stored in `build/[os_name]/`.
+- **Clean Build**: `make clean`
+- **Dependencies Check**: `make check_deps`
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.

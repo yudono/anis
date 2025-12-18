@@ -79,7 +79,10 @@ public:
     std::map<std::string, std::function<Value(std::vector<Value>)>> natives;
     
     Value lastReturnValue;
-     bool isReturning = false;
+    bool isReturning = false;
+    
+    Value lastExpressionValue;
+    bool hasLastExpressionValue = false;
     
     // Hooks State
     std::vector<Value> hooks;

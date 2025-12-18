@@ -5,6 +5,7 @@
 std::vector<std::shared_ptr<Stmt>> Parser::parse() {
     std::vector<std::shared_ptr<Stmt>> statements;
     while (!isAtEnd()) {
+        if (match(TOK_SEMICOLON)) continue; // Skip empty statements
         try {
             statements.push_back(declaration());
         } catch (...) {
@@ -15,6 +16,9 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
 }
 
 std::shared_ptr<Stmt> Parser::declaration() {
+    // Skip extra semicolons
+    while (match(TOK_SEMICOLON));
+    
     // Export statement
     if (match(TOK_EXPORT)) {
         auto decl = declaration();  // Parse what follows (function, var, etc)

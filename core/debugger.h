@@ -15,6 +15,8 @@
 
 class Debugger {
 public:
+    static bool isReplMode;
+
     static void error(const std::string& message, const std::string& file = "", int line = 0) {
         std::cerr << COLOR_RED << "❌ ERROR";
         if (!file.empty()) {
@@ -25,7 +27,7 @@ public:
         }
         std::cerr << COLOR_RESET << std::endl;
         std::cerr << COLOR_RED << "   " << message << COLOR_RESET << std::endl;
-        exit(1);
+        if (!isReplMode) exit(1);
     }
     
     static void warning(const std::string& message, const std::string& file = "", int line = 0) {
@@ -58,7 +60,7 @@ public:
         if (!token.empty()) {
             std::cerr << COLOR_YELLOW << "   Near: '" << token << "'" << COLOR_RESET << std::endl;
         }
-        exit(1);
+        if (!isReplMode) exit(1);
     }
     
     static void runtimeError(const std::string& message, int line = 0, const std::string& source = "", const std::string& file = "") {
@@ -89,8 +91,13 @@ public:
                  current++;
              }
         }
-        exit(1);
+        if (!isReplMode) exit(1);
     }
 };
+
+// Definition of static member should be in a .cpp file usually,
+// but if we want to keep it header-only for now we can use inline (C++17) 
+// or define it in sunda.cpp.
+// Since we have core/debugger.h let's see if there is a debugger.cpp.
 
 #endif

@@ -35,9 +35,8 @@ INCLUDES += -Ilib/gui -Icore/lang -I.
 
 # Directory Structure
 BUILD_ROOT = build
-BIN_ROOT = bin
+BIN_DIR = bin
 BUILD_DIR = $(BUILD_ROOT)/$(OS_NAME)
-BIN_DIR = $(BIN_ROOT)/$(OS_NAME)
 
 # Source directories
 GUI_DIR = lib/gui
@@ -58,7 +57,7 @@ OBJS = $(MAIN_OBJ) $(LIB_OBJ) $(LANG_OBJ) $(GUI_OBJ)
 
 TARGET_NAME = sunda$(EXE_EXT)
 TARGET = $(BUILD_DIR)/$(TARGET_NAME)
-FINAL_BIN = $(BIN_DIR)/$(TARGET_NAME)
+FINAL_BIN = $(BIN_DIR)/sunda$(EXE_EXT)
 
 .PHONY: all clean check_deps setup copy sunda
 
@@ -113,4 +112,4 @@ copy: $(TARGET)
 sunda: all
 
 clean:
-	rm -rf $(BUILD_ROOT) $(BIN_ROOT)
+	rm -rf $(BUILD_ROOT) $(BIN_DIR)

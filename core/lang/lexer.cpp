@@ -56,6 +56,15 @@ std::vector<Token> Lexer::tokenize() {
             }
             advance(); // skip closing
             addToken(TOK_STRING, str);
+        } else if (c == '\'') {
+             // ...
+             advance(); // skip opening
+            std::string str;
+            while (peek() != '\'' && pos < src.size()) {
+                 str += advance();
+            }
+            advance(); // skip closing
+            addToken(TOK_STRING, str);
         } else {
             advance();
             if (c == '(') addToken(TOK_LPAREN, "(");

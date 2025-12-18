@@ -222,7 +222,8 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
         }
     }
     else if (auto exprStmt = std::dynamic_pointer_cast<ExprStmt>(stmt)) {
-        evaluate(exprStmt->expr);
+        lastExpressionValue = evaluate(exprStmt->expr);
+        hasLastExpressionValue = true;
     }
 }
 
