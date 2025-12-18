@@ -18,18 +18,18 @@ Sunda is a modern, lightweight, and cross-platform programming language built in
 
 | OS | Requirements |
 |---|---|
-| **macOS** | Clang++, GLFW, Freetype (via Homebrew) |
-| **Linux** | Clang++, `pkg-config`, `libglfw3-dev`, `libfreetype6-dev` |
-| **Windows**| Clang++ (MinGW-w64), GLFW3, Freetype |
+| **macOS** | Clang++, GLFW, Freetype, SQLite3, MySQL (via Homebrew) |
+| **Linux** | Clang++, `pkg-config`, `libglfw3-dev`, `libfreetype6-dev`, `libsqlite3-dev`, `libmysqlclient-dev` |
+| **Windows**| Clang++ (MinGW-w64), GLFW3, Freetype, SQLite3, MySQL |
 
 #### macOS
 ```bash
-brew install glfw freetype
+brew install glfw freetype sqlite mysql-client
 ```
 
 #### Linux (Ubuntu/Debian)
 ```bash
-sudo apt-get install clang libglfw3-dev libfreetype6-dev pkg-config
+sudo apt-get install clang libglfw3-dev libfreetype6-dev libsqlite3-dev libmysqlclient-dev pkg-config
 ```
 
 ### Building from Source
@@ -70,6 +70,7 @@ For detailed documentation, explore the files in the `DOCS/` directory:
 - [Language Syntax](DOCS/syntax.md): Syntax, variables, and control flow.
 - [GUI Components](DOCS/gui.md): Building UIs with JSX-style components.
 - [Standard Library](DOCS/stdlib.md): Reference for built-in modules.
+- [Native Library Guide](DOCS/native_library_guide.md): Guide for extending Sunda with C++.
 
 ## 🛠️ Development
 

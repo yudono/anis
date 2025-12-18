@@ -3,7 +3,11 @@
 
 #include "types.h"
 #include <string>
+#ifdef __APPLE__
 #include <OpenGL/gl.h> 
+#else
+#include <GL/gl.h>
+#endif
 
 void init_freetype();
 void draw_text(float x, float y, const std::string& text, float scale = 1.0f, Color color = {1,1,1,1});

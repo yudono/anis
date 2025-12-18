@@ -22,12 +22,12 @@ ifeq ($(OS_NAME),macos)
     INCLUDES = -I$(HOMEBREW_PREFIX)/include -I$(HOMEBREW_PREFIX)/include/freetype2 -I$(HOMEBREW_PREFIX)/include/mysql
     LDFLAGS = -L$(HOMEBREW_PREFIX)/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -lglfw -lfreetype -lsqlite3 -lmysqlclient
 else ifeq ($(OS_NAME),linux)
-    INCLUDES = $(shell pkg-config --cflags glfw3 freetype2 sqlite3)
-    LDFLAGS = $(shell pkg-config --libs glfw3 freetype2 sqlite3) -lmysqlclient -lGL -lX11 -lpthread -ldl
+    INCLUDES = $(shell pkg-config --cflags glfw3 freetype2 sqlite3 mysqlclient)
+    LDFLAGS = $(shell pkg-config --libs glfw3 freetype2 sqlite3 mysqlclient) -lGL -lX11 -lpthread -ldl
 else ifeq ($(OS_NAME),windows)
     # Assuming MinGW/clang on Windows with libraries in standard paths
-    INCLUDES = -I/usr/include/freetype2
-    LDFLAGS = -lglfw3 -lfreetype -lsqlite3 -lgdi32 -lopengl32 -lwinmm
+    INCLUDES = -I/usr/include/freetype2 -I/usr/include/mysql
+    LDFLAGS = -lglfw3 -lfreetype -lsqlite3 -lmysqlclient -lgdi32 -lopengl32 -lwinmm
 endif
 
 # Common Includes
@@ -73,6 +73,8 @@ ifeq ($(OS_NAME),macos)
 else ifeq ($(OS_NAME),linux)
 	@pkg-config --exists glfw3 || { echo >&2 "Error: glfw3 not found via pkg-config"; exit 1; }
 	@pkg-config --exists freetype2 || { echo >&2 "Error: freetype2 not found via pkg-config"; exit 1; }
+	@pkg-config --exists sqlite3 || { echo >&2 "Error: sqlite3 not found via pkg-config"; exit 1; }
+	@pkg-config --exists mysqlclient || { echo >&2 "Error: mysqlclient not found via pkg-config"; exit 1; }
 endif
 	@echo "Dependencies OK."
 
