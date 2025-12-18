@@ -1,7 +1,8 @@
 import { setState } from "gui"
 
 export function FormView({ item, onSave, onCancel }) {
-    const [name, setName] = setState(item ? item.name : "")
+    // Handle item.name with proper fallback
+    const [name, setName] = setState((item && item.name) ? item.name : "")
 
     return (
         <Column padding="20px" width="400px">
@@ -21,10 +22,12 @@ export function FormView({ item, onSave, onCancel }) {
 
             <Row>
                 <Button
-                    onClick={() => onSave({
-                        id: item ? item.id : null,
-                        name
-                    })}
+                    onClick={() => {
+                        onSave({
+                            id: item ? item.id : null,
+                            name
+                        })
+                    }}
                 >
                     Save
                 </Button>

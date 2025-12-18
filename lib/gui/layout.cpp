@@ -461,9 +461,9 @@ void render_node(const Node& n, float x, float& y, double mx, double my, bool cl
                  cellW = s.x;
              }
              
-             if (n.tag == "Row") {
-                 printf("Row Cell %d: childW=%f, cellW=%f (Tag: %s)\n", colIdx, childW, cellW, c.tag.c_str());
-             }
+            //  if (n.tag == "Row") {
+            //      printf("Row Cell %d: childW=%f, cellW=%f (Tag: %s)\n", colIdx, childW, cellW, c.tag.c_str());
+            //  }
              
              // Draw Cell
              // Center vertically?

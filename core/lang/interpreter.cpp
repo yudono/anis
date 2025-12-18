@@ -69,7 +69,8 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
         // JIT Loading
         // std::cout << "[JIT] Loading module: " << imp->moduleName << std::endl;
         
-        if (imp->moduleName == "gui" || imp->moduleName == "math") {
+        if (imp->moduleName == "gui" || imp->moduleName == "math" || imp->moduleName == "string" || 
+            imp->moduleName == "array" || imp->moduleName == "map") {
             // Built-in module: import requested symbols
             if (!imp->symbols.empty()) {
                 // Import specific symbols: import { render_gui } from "gui"
@@ -274,7 +275,12 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
     }
     if (auto ternary = std::dynamic_pointer_cast<TernaryExpr>(expr)) {
         Value cond = evaluate(ternary->condition);
-        bool isTrue = (cond.isInt && cond.intVal != 0) || (!cond.isInt && !cond.strVal.empty());
+        // Objects and lists should be truthy even if strVal is empty
+        // "undefined" string should be falsy
+        bool isTrue = (cond.isInt && cond.intVal != 0) || 
+                      cond.isList || cond.isMap || 
+                      (!cond.isInt && !cond.isList && !cond.isMap && 
+                       !cond.strVal.empty() && cond.strVal != "undefined");
         if (isTrue) {
             return evaluate(ternary->trueExpr);
         } else {
@@ -421,7 +427,7 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
             xml += ">";
             for(auto c : jsx->children) {
                  Value cv = evaluate(c);
-                 std::cerr << "JSX CHILD: isList=" << cv.isList << " isInt=" << cv.isInt << " isClosure=" << cv.isClosure << " isNative=" << cv.isNative << " str=" << cv.strVal.substr(0, 50) << std::endl;
+                //  std::cerr << "JSX CHILD: isList=" << cv.isList << " isInt=" << cv.isInt << " isClosure=" << cv.isClosure << " isNative=" << cv.isNative << " str=" << cv.strVal.substr(0, 50) << std::endl;
                  // Skip falsy values (for conditional rendering: {condition && <Component />})
                  // IMPORTANT: Lists should NOT be treated as falsy even if strVal is empty!
                  bool isFalsy = (cv.isInt && cv.intVal == 0) || (!cv.isInt && !cv.isList && cv.strVal.empty());
@@ -429,10 +435,10 @@ Value Interpreter::evaluate(std::shared_ptr<Expr> expr) {
                      // Check if it is a list (result of map)
                      if (cv.isList && cv.listVal) {
                          // Flatten list
-                         std::cerr << "FLATTEN: List size=" << cv.listVal->size() << std::endl;
+                        //  std::cerr << "FLATTEN: List size=" << cv.listVal->size() << std::endl;
                          for (const auto& item : *cv.listVal) {
                              xml += item.toString();
-                             std::cerr << "FLATTEN ITEM: " << item.toString().substr(0, 100) << "..." << std::endl;
+                            //  std::cerr << "FLATTEN ITEM: " << item.toString().substr(0, 100) << "..." << std::endl;
                          }
                      } else {
                          xml += cv.toString();

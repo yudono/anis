@@ -1,0 +1,70 @@
+// Test Array Library Functions
+import { arr_push, arr_pop, arr_shift, arr_unshift, arr_slice, arr_concat, arr_reverse, arr_sort, arr_includes, arr_indexOf, arr_join } from "array"
+
+println("=== Array Library Tests ===")
+println("")
+
+// Test push & pop
+println("1. Testing push() and pop():")
+var numbers = [1, 2, 3]
+arr_push(numbers, 4)
+println("  After push(4): " + arr_join(numbers, ", "))
+var last = arr_pop(numbers)
+println("  After pop(): " + arr_join(numbers, ", ") + " (removed: " + last + ")")
+
+// Test shift & unshift
+println("")
+println("2. Testing shift() and unshift():")
+var fruits = ["banana", "cherry"]
+arr_unshift(fruits, "apple")
+println("  After unshift('apple'): " + arr_join(fruits, ", "))
+var first = arr_shift(fruits)
+println("  After shift(): " + arr_join(fruits, ", ") + " (removed: " + first + ")")
+
+// Test slice
+println("")
+println("3. Testing slice():")
+var items = [10, 20, 30, 40, 50]
+var sliced = arr_slice(items, 1, 4)
+println("  slice([10,20,30,40,50], 1, 4) = " + arr_join(sliced, ", "))
+
+// Test concat
+println("")
+println("4. Testing concat():")
+var arr1 = [1, 2, 3]
+var arr2 = [4, 5, 6]
+var combined = arr_concat(arr1, arr2)
+println("  concat([1,2,3], [4,5,6]) = " + arr_join(combined, ", "))
+
+// Test reverse
+println("")
+println("5. Testing reverse():")
+var letters = ["a", "b", "c", "d"]
+arr_reverse(letters)
+println("  reverse(['a','b','c','d']) = " + arr_join(letters, ", "))
+
+// Test sort
+println("")
+println("6. Testing sort():")
+var unsorted = [5, 2, 8, 1, 9]
+arr_sort(unsorted)
+println("  sort([5,2,8,1,9]) = " + arr_join(unsorted, ", "))
+
+// Test includes
+println("")
+println("7. Testing includes():")
+var colors = ["red", "green", "blue"]
+var hasGreen = arr_includes(colors, "green")
+var hasYellow = arr_includes(colors, "yellow")
+println("  includes(['red','green','blue'], 'green') = " + hasGreen)
+println("  includes(['red','green','blue'], 'yellow') = " + hasYellow)
+
+// Test indexOf
+println("")
+println("8. Testing indexOf():")
+var nums = [10, 20, 30, 40]
+var idx = arr_indexOf(nums, 30)
+println("  indexOf([10,20,30,40], 30) = " + idx)
+
+println("")
+println("=== All Array Tests Complete ===")

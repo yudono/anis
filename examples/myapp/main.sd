@@ -34,7 +34,7 @@ function App() {
 
             {view == "form" && (
                 <FormView
-                    item={editItem}
+                    item={editItem || null}
                     onSave={(data) => {
                         if (editItem) {
                             var updated = items.map((i) => {

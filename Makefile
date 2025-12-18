@@ -9,13 +9,13 @@ GUI_DIR = lib/gui
 # Source files
 # LANG_SRC = $(wildcard core/lang/*.cpp) # Use manual list if wildcard issues
 LANG_SRC = core/lang/lexer.cpp core/lang/parser.cpp core/lang/interpreter.cpp core/lang/value_impl.cpp
-LIB_SRC = lib/register.cpp
+LIB_SRC = lib/register.cpp lib/string/string.cpp
 GUI_SRC = lib/gui/renderer.cpp lib/gui/parser.cpp lib/gui/widgets.cpp lib/gui/layout.cpp lib/gui/minigui.cpp
 MAIN_SRC = sunda.cpp
 
 # Object files
 LANG_OBJ = $(patsubst core/lang/%.cpp, build/lang_%.o, $(LANG_SRC))
-LIB_OBJ = build/register.o
+LIB_OBJ = build/register.o build/string_string.o build/array_array.o build/map_map.o
 GUI_OBJ = $(patsubst lib/gui/%.cpp, build/gui_%.o, $(GUI_SRC)) # Adjusted to match build rule
 MAIN_OBJ = build/sunda.o
 
@@ -79,6 +79,18 @@ build/lang_%.o: core/lang/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 build/register.o: lib/register.cpp
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+build/string_string.o: lib/string/string.cpp
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+build/array_array.o: lib/array/array.cpp
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+build/map_map.o: lib/map/map.cpp
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
