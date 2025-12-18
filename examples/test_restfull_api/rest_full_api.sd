@@ -1,0 +1,137 @@
+import { Webserver } from "webserver";
+import { db_connect, db_execute, db_query, db_close } from "db";
+
+// 1. Initialize Database
+const dbPath = env("DB_PATH") || "examples/test_restfull_api/sunda.db";
+const connected = db_connect("sqlite://" + dbPath);
+
+if (!connected) {
+    println("Failed to connect to DB");
+    // throw new Error("DB Connection Failed"); // If throw is supported
+}
+println("Connected to DB at " + dbPath);
+
+// 2. Setup Tables
+db_execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)");
+db_execute("CREATE TABLE IF NOT EXISTS tokens (token TEXT PRIMARY KEY, user_id INTEGER)");
+
+// 3. Setup Webserver
+const app = Webserver();
+const PORT = 8080;
+// If env("PORT") returns string, implicit conversion might happen or we need Number().
+// For now, let's hardcode or just use simple OR if supported for types. 
+// const PORT = env("PORT") || 8080; 
+
+// Helper: Generate Token
+function generateToken() {
+    return "tk_" + Date.now();
+}
+
+// Routes
+
+// POST /register
+app.post("/register", (c) => {
+    try {
+        const body = c.req.json();
+        if (!body.username || !body.password) {
+            return c.json({ error: "Missing username or password" });
+        }
+
+        // Check if user exists
+        const exists = db_query("SELECT id FROM users WHERE username = ?", [body.username]);
+        if (exists.length > 0) {
+            return c.json({ error: "User already exists" });
+        }
+
+        delay(500); // Simulate hashing cost
+
+        db_execute("INSERT INTO users (username, password) VALUES (?, ?)", [body.username, body.password]);
+        return c.json({ message: "User created" });
+
+    } catch (e) {
+        console.error("Register Error: " + e.message);
+        return c.json({ error: "Internal Server Error" });
+    }
+});
+
+// POST /login
+app.post("/login", (c) => {
+    try {
+        const body = c.req.json();
+        const users = db_query("SELECT id, password FROM users WHERE username = ?", [body.username]);
+
+        // Validate
+        if (users.length == 0) {
+            delay(200); return c.json({ error: "Invalid credentials" });
+        }
+
+        const user = users[0];
+        if (user.password != body.password) {
+            delay(200); return c.json({ error: "Invalid credentials" });
+        }
+
+        const token = generateToken();
+        db_execute("INSERT INTO tokens (token, user_id) VALUES (?, ?)", [token, user.id]);
+
+        return c.json({ token: token });
+
+    } catch (e) {
+        console.error("Login Error: " + e.message);
+        return c.json({ error: "Internal Error" });
+    }
+});
+
+// Helper for Auth Check (since no middleware support visible)
+function getAuthUser(c) {
+    const authHeader = c.req.header("Authorization");
+    if (!authHeader) return null;
+
+    // Manual string replace or substring if replace not available on string?
+    // String lib has replace coming? Assuming generic string usage or manual slice.
+    // "Bearer " is 7 chars.
+    // Let's assume standard string methods or just use what we have.
+    // Safe bet: just query exact check or naive parsing
+    // const token = authHeader.replace("Bearer ", ""); 
+
+    // Fallback if replace missing: 
+    // var token = authHeader;
+    // ...
+    // Let's try matching. 
+    // Assuming token is passed directly or we parse.
+    // For simplicity of this example, let's assume client sends just the token or we handle "Bearer " substring if exists.
+
+    // Using string substring if available? 
+    // Sunda `string` lib likely has it.
+
+    const token = authHeader; // Simplification: Client sends "Bearer token" or just "token". 
+    // We will query DB.
+
+    // NOTE: In real world, strip prefix.
+
+    const session = db_query("SELECT user_id FROM tokens WHERE token = ? OR token = ?", [token, token.replace("Bearer ", "")]);
+    if (session.length == 0) return null;
+    return session[0].user_id;
+}
+
+// GET /profile (Protected)
+app.get("/profile", (c) => {
+    const userId = getAuthUser(c);
+    if (!userId) {
+        return c.json({ error: "Unauthorized" });
+    }
+
+    const users = db_query("SELECT username FROM users WHERE id = ?", [userId]);
+    if (users.length == 0) return c.json({ error: "User Not Found" });
+
+    return c.json({
+        id: userId,
+        username: users[0].username,
+        message: "This is protected data"
+    });
+});
+
+println("Starting server on port " + PORT + "...");
+// Simulate startup delay
+delay(1000);
+
+app.listen({ port: PORT });

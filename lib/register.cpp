@@ -1,5 +1,9 @@
 #include "../core/lang/interpreter.h"
 #include "../core/debugger.h"
+#include <thread>
+#include <chrono>
+#include <fstream>
+#include <cstdlib>
 #include "gui/minigui.h" // For render_gui binding logic which might be moved here later? 
 // Actually gui bindings were in sunda.cpp. We should move them here OR keep them separate?
 // User asked to move explicit registration to register.cpp
@@ -90,7 +94,44 @@ void register_std_libs(Interpreter& interpreter) {
         std::cerr << COLOR_RED;
         for (const auto& arg : args) std::cerr << arg.toString() << " ";
         std::cerr << COLOR_RESET << std::endl;
+    });
+    interpreter.globals->define("console", Value(logger));
+
+    // Delay Builtin
+    interpreter.registerNative("delay", [](std::vector<Value> args) -> Value {
+        if (args.empty() || !args[0].isInt) return Value("", 0, false);
+        std::this_thread::sleep_for(std::chrono::milliseconds(args[0].intVal));
         return Value("", 0, false);
     });
-    interpreter.globals->define("logger", Value(logger));
+
+    // Env Builtin
+    interpreter.registerNative("env", [](std::vector<Value> args) -> Value {
+        static std::map<std::string, std::string> envCache;
+        static bool loaded = false;
+
+        if (!loaded) {
+            std::ifstream file(".env");
+            std::string line;
+            while (std::getline(file, line)) {
+                if (line.empty() || line[0] == '#') continue;
+                size_t eq = line.find('=');
+                if (eq != std::string::npos) {
+                    std::string key = line.substr(0, eq);
+                    std::string val = line.substr(eq + 1);
+                    envCache[key] = val;
+                }
+            }
+            loaded = true;
+        }
+
+        if (args.empty() || !args[0].isInt == false) return Value("", 0, false); // Expect string
+        std::string key = args[0].strVal;
+        
+        if (envCache.count(key)) return Value(envCache[key], 0, false);
+        
+        const char* val = std::getenv(key.c_str());
+        if (val) return Value(val, 0, false);
+        
+        return Value("", 0, false); 
+    });
 }
