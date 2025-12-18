@@ -1,6 +1,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#ifdef __APPLE__
 #include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
 #include "minigui.h"
 #include "types.h"
 #include "parser.h"

@@ -4,7 +4,6 @@
 #include "layout.h"
 #include <iostream>
 #include <map>
-#include <OpenGL/gl.h>
 
 // Global context
 std::string g_basePath = "";
