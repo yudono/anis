@@ -26,9 +26,10 @@ else ifeq ($(OS_NAME),linux)
     INCLUDES = $(shell pkg-config --cflags glfw3 freetype2 sqlite3 mysqlclient libcurl openssl)
     LDFLAGS = $(shell pkg-config --libs glfw3 freetype2 sqlite3 mysqlclient libcurl openssl) -lGL -lX11 -lpthread -ldl
 else ifeq ($(OS_NAME),windows)
-    # Assuming MinGW/clang on Windows with libraries in standard paths
-    INCLUDES = -I/usr/include/freetype2 -I/usr/include/mysql
-    LDFLAGS = -lglfw3 -lfreetype -lsqlite3 -lmysqlclient -lcurl -lgdi32 -lopengl32 -lwinmm
+    # Windows build using DLLs from win/ directory
+    WIN_LIB_DIR = win
+    INCLUDES = -Iwin/include -Iwin/include/freetype2 -Iwin/include/mysql
+    LDFLAGS = -Lwin -lglfw3 -lfreetype -lsqlite3 -lmysqlcppconn-10-vs14 -lcurl-x64 -lssl -lcrypto -lgdi32 -lopengl32 -lwinmm -lws2_32
 endif
 
 # Common Includes
@@ -76,9 +77,14 @@ else ifeq ($(OS_NAME),linux)
 	@pkg-config --exists freetype2 || { echo >&2 "Error: freetype2 not found via pkg-config"; exit 1; }
 	@pkg-config --exists sqlite3 || { echo >&2 "Error: sqlite3 not found via pkg-config"; exit 1; }
 	@pkg-config --exists mysqlclient || { echo >&2 "Error: mysqlclient not found via pkg-config"; exit 1; }
-	@pkg-config --exists mysqlclient || { echo >&2 "Error: mysqlclient not found via pkg-config"; exit 1; }
 	@pkg-config --exists libcurl || { echo >&2 "Error: libcurl not found via pkg-config"; exit 1; }
 	@pkg-config --exists openssl || { echo >&2 "Error: openssl not found via pkg-config"; exit 1; }
+else ifeq ($(OS_NAME),windows)
+	@test -f win/glfw3.dll || { echo >&2 "Error: glfw3.dll not found in win/"; exit 1; }
+	@test -f win/freetype.dll || { echo >&2 "Error: freetype.dll not found in win/"; exit 1; }
+	@test -f win/sqlite3.dll || { echo >&2 "Error: sqlite3.dll not found in win/"; exit 1; }
+	@test -f win/mysqlcppconn-10-vs14.dll || { echo >&2 "Error: mysqlcppconn-10-vs14.dll not found in win/"; exit 1; }
+	@test -f win/libcurl-x64.dll || { echo >&2 "Error: libcurl-x64.dll not found in win/"; exit 1; }
 endif
 	@echo "Dependencies OK."
 
@@ -113,6 +119,10 @@ $(TARGET): $(OBJS)
 
 copy: $(TARGET)
 	@cp $(TARGET) $(FINAL_BIN)
+ifeq ($(OS_NAME),windows)
+	@echo "Copying Windows DLLs to $(BIN_DIR)..."
+	@cp win/*.dll $(BIN_DIR)/
+endif
 	@echo "Build successful! Binary location: $(FINAL_BIN)"
 
 sunda: all
