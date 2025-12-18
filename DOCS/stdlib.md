@@ -113,7 +113,7 @@ sayHello("World");
 ### `webserver` Module
 The `webserver` module provides a low-level TCP/IP server with a high-level API.
 
-- `WebServer_create()`: Creates a new server instance.
+- `Webserver()`: Creates a new server instance.
   - `app.get(path, handler)`: Registers a GET route.
   - `app.post(path, handler)`: Registers a POST route.
   - `app.put(path, handler)`: Registers a PUT route.

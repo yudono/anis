@@ -1,9 +1,9 @@
 // Web Server Verification Script (Hono-like API)
-import { WebServer_create } from "webserver";
+import { Webserver } from "webserver";
 
 // Factory function for "Server" (Hono-like wrapper)
 function Server() {
-    const s = WebServer_create();
+    const s = Webserver();
     return s;
 }
 

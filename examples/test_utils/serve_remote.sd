@@ -1,7 +1,7 @@
-import { WebServer_create } from "webserver";
+import { Webserver } from "webserver";
 import { fs_readFile } from "fs";
 
-const app = WebServer_create();
+const app = Webserver();
 
 app.get("/test_function.sd", (c) => {
     const content = fs_readFile("examples/test_utils/remote_script.sd");

@@ -1,6 +1,6 @@
 
 // HTTPS Test
-var http = WebServer_create();
+var http = Webserver();
 
 http.get("/", (ctx) => {
     return ctx.text("Secure Hello World!");

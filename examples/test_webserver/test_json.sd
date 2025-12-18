@@ -1,7 +1,7 @@
 // Web Server JSON Verification Script
-import { WebServer_create } from "webserver";
+import { Webserver } from "webserver";
 
-const app = WebServer_create();
+const app = Webserver();
 
 app.get("/json", (c) => {
     return c.json({

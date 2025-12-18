@@ -86,9 +86,22 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
             if (!imp->symbols.empty()) {
                 for (auto& sym : imp->symbols) {
                     if (natives.count(sym)) {
-                        // Create a Value wrapper for the native function
-                        Value nativeVal(natives[sym]);
-                        globals->define(sym, nativeVal);
+                        try {
+                            // Create a Value wrapper for the native function
+                            Value nativeVal(natives[sym]);
+                            if (globals) {
+                                globals->define(sym, nativeVal);
+                            } else {
+                                std::cerr << "[Import Error] Globals env is null" << std::endl;
+                            }
+                        } catch (const std::exception& e) {
+                            std::cerr << "[Import Error] Failed to import symbol " << sym << ": " << e.what() << std::endl;
+                        } catch (...) {
+                            std::cerr << "[Import Error] Failed to import symbol " << sym << " (Unknown)" << std::endl;
+                        }
+                    } else {
+                        // Symbol not found in natives
+                        std::cerr << "[Import Warning] Native symbol '" << sym << "' not found in module '" << imp->moduleName << "'" << std::endl;
                     }
                 }
             }

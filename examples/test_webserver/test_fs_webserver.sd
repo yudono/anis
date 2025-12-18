@@ -1,10 +1,10 @@
 // Static File Web Server Verification Script
-import { WebServer_create } from "webserver";
+import { Webserver } from "webserver";
 import { fs_readFile, fs_exists } from "fs";
 
 println("🚀 Starting Static File Web Server...");
 
-const app = WebServer_create();
+const app = Webserver();
 
 app.get("/", (c) => {
     const filePath = "examples/test_webserver/index.html";

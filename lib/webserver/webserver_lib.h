@@ -164,7 +164,7 @@ void register_webserver(Interpreter& interpreter) {
     // Special hack for listen since it needs interpreter
     static Interpreter* s_interpreter = &interpreter; 
     
-    interpreter.registerNative("WebServer_create", [](std::vector<Value> args) -> Value {
+    interpreter.registerNative("Webserver", [](std::vector<Value> args) -> Value {
         auto instance = std::make_shared<ServerInstance>();
         g_servers.push_back(instance);
         

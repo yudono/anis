@@ -1,6 +1,6 @@
-import { WebServer_create } from "webserver";
+import { Webserver } from "webserver";
 
-const app = WebServer_create();
+const app = Webserver();
 
 app.post("/api/echo", (c) => {
     const body = c.req.json();
