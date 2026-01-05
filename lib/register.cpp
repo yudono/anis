@@ -1,11 +1,11 @@
 #include "../core/lang/interpreter.h"
-#include "../core/debugger.h"
+#include "../core/lang/debugger.h"
 #include <thread>
 #include <chrono>
 #include <fstream>
 #include <cstdlib>
 #include "gui/minigui.h" // For render_gui binding logic which might be moved here later? 
-// Actually gui bindings were in sunda.cpp. We should move them here OR keep them separate?
+// Actually gui bindings were in anis.cpp. We should move them here OR keep them separate?
 // User asked to move explicit registration to register.cpp
 
 // Include Libs
@@ -26,7 +26,7 @@
 #include "http/http_lib.h"
 #include "register.h"
 
-// Forward declare GUI registration if it's still in sunda.cpp or move it?
+// Forward declare GUI registration if it's still in anis.cpp or move it?
 // For now, let's implement a clean registry function.
 
 // Header

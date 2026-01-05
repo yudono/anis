@@ -1,0 +1,24 @@
+// Static File Web Server Verification Script
+import { Webserver } from "webserver";
+import { fs_readFile, fs_exists } from "fs";
+
+println("🚀 Starting Static File Web Server...");
+
+const app = Webserver();
+
+app.get("/", (c) => {
+    const filePath = "examples/test_webserver/index.html";
+    if (fs_exists(filePath)) {
+        const content = fs_readFile(filePath);
+        return c.html(content);
+    } else {
+        return c.text("Error: index.html not found at " + filePath);
+    }
+});
+
+app.get("/api/info", (c) => {
+    return c.text("Anis Runtime Static Server v1.0");
+});
+
+println("Server running on http://localhost:3000");
+app.listen({ port: 3000 });

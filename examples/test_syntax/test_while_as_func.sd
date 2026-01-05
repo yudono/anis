@@ -1,8 +1,0 @@
-// Test: is while parsed as a function?
-print("Before")
-var result = 0
-while (1 < 2) {
-    result = 1
-    print("After")
-}
-print(result)

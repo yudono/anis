@@ -1,6 +1,6 @@
 # GUI Library
 
-Sunda provides a built-in GUI engine that uses a JSX-like syntax for declaring layouts.
+Anis provides a built-in GUI engine that uses a JSX-like syntax for declaring layouts.
 
 ## Basic Structure
 
@@ -12,7 +12,7 @@ import { render_gui } from "gui";
 const App = () => (
     <View width="100%" height="100%" padding="20">
         <Column gap="10">
-            <Text value="Sunda Dashboard" fontSize="24" color="#FFF" />
+            <Text value="Anis Dashboard" fontSize="24" color="#FFF" />
             <Button label="Click Me" onClick={() => println("Clicked!")} />
         </Column>
     </View>

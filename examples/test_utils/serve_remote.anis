@@ -1,0 +1,12 @@
+import { Webserver } from "webserver";
+import { fs_readFile } from "fs";
+
+const app = Webserver();
+
+app.get("/test_function.anis", (c) => {
+    const content = fs_readFile("examples/test_utils/remote_script.anis");
+    return c.text(content);
+});
+
+println("Remote provider server starting on port 4000...");
+app.listen({ port: 4000 });

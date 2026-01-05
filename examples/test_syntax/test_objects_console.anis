@@ -1,0 +1,53 @@
+// Test basic object/array features in console
+println("=== Object Test ===")
+var obj = { name: "Apple", price: 100 }
+println("Object: ", obj)
+println("Name: ", obj.name)
+println("Price: ", obj.price)
+
+obj.price = 150
+println("Updated price: ", obj.price)
+
+println("")
+println("=== Array Test ===")
+var arr = [10, 20, 30]
+println("Array: ", arr)
+println("First: ", arr[0])
+
+arr.push(40)
+println("After push: ", arr)
+
+println("")
+println("=== Array Map Test ===")
+var doubled = arr.map((x) => {
+    return x * 2
+})
+println("Doubled: ", doubled)
+
+println("")
+println("=== Array Filter Test ===")
+var filtered = arr.filter((x) => {
+    if (x > 25) { return 1 }
+    return 0
+})
+println("Filtered (>25): ", filtered)
+
+println("")
+println("=== Object Array Test ===")
+var items = [
+    { id: 1, name: "Apple", price: 100 },
+    { id: 2, name: "Banana", price: 50 },
+    { id: 3, name: "Orange", price: 75 }
+]
+
+println("Items: ", items)
+println("First item name: ", items[0].name)
+
+var expensive = items.filter((item) => {
+    if (item.price > 60) { return 1 }
+    return 0
+})
+println("Expensive items: ", expensive)
+
+println("")
+println("=== All tests passed! ===")

@@ -1,0 +1,147 @@
+import { Webserver } from "webserver";
+import { db_connect, db_execute, db_query, db_close } from "db";
+
+// 1. Initialize Database
+const dbPath = env("DB_PATH") || "examples/test_restfull_api/anis.db";
+const connected = db_connect("sqlite://" + dbPath);
+
+if (!connected) {
+    println("Failed to connect to DB");
+    // throw new Error("DB Connection Failed"); // If throw is supported
+}
+println("Connected to DB at " + dbPath);
+if (!connected) println("Failed to connect to DB");
+else println("Connected to DB at " + dbPath);
+
+// 2. Setup Tables
+db_execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)");
+db_execute("CREATE TABLE IF NOT EXISTS tokens (token TEXT PRIMARY KEY, user_id INTEGER)");
+
+// 3. Setup Webserver
+const app = Webserver();
+const PORT = 8081;
+
+// Middleware 1: Logger
+app.use((c) => {
+    println("[" + c.req.method + "] " + c.req.path);
+    c.next();
+});
+
+// Middleware 2: Global Headers
+app.use((c) => {
+    // We can't set response headers in this simple version yet effectively without response object, 
+    // but we can proceed.
+    c.next();
+});
+
+// Helper: Generate Token
+var tokenCounter = 0;
+function generateToken() {
+    tokenCounter = tokenCounter + 1;
+    return "tk_" + ("" + tokenCounter);
+}
+
+// 4. API Routes (Grouped)
+app.group("/api/v1", () => {
+
+    // Auth Group
+    app.group("/auth", () => {
+        app.post("/register", (c) => {
+            try {
+                const body = c.req.json();
+                if (!body.username || !body.password) return c.json({ error: "Missing data" });
+
+                const exists = db_query("SELECT id FROM users WHERE username = ?", [body.username]);
+                if (exists.length > 0) return c.json({ error: "User exists" });
+
+                delay(200); // Hashing
+                db_execute("INSERT INTO users (username, password) VALUES (?, ?)", [body.username, body.password]);
+                return c.json({ message: "User created" });
+            } catch (e) {
+                console.error("Reg Error: " + e.message);
+                return c.json({ error: "Internal Error" });
+            }
+        });
+
+        app.post("/login", (c) => {
+            try {
+                const body = c.req.json();
+                const users = db_query("SELECT id, password FROM users WHERE username = ?", [body.username]);
+
+                if (users.length == 0 || users[0].password != body.password) {
+                    delay(200); return c.json({ error: "Invalid credentials" });
+                }
+
+                const token = generateToken();
+                db_execute("INSERT INTO tokens (token, user_id) VALUES (?, ?)", [token, users[0].id]);
+                return c.json({ token: token });
+            } catch (e) {
+                console.error("Login Error: " + e.message);
+                return c.json({ error: "Internal Error" });
+            }
+        });
+    });
+
+    // Protected User Routes (Dynamic)
+    app.group("/user", () => {
+        app.get("/profile/:id", (c) => {
+            const auth = c.req.header("Authorization");
+            if (!auth) return c.json({ error: "Unauthorized" });
+
+            // Simulating Token Validation (In real app, parse/verify)
+            const token = auth;
+            const session = db_query("SELECT user_id FROM tokens WHERE token = ?", [token]);
+            if (session.length == 0) return c.json({ error: "Invalid Token" });
+
+            // Check requested ID from params
+            const reqId = c.req.params.id; // Corrected: access params object
+
+            // Allow if admin or same user? For now just return public info.
+            // Or typically /user/:id is public profile.
+            // But let's verify exists.
+
+            const users = db_query("SELECT id, username FROM users WHERE id = ?", [reqId]);
+            if (users.length == 0) return c.json({ error: "User Not Found" });
+
+            return c.json({
+                id: users[0].id,
+                username: users[0].username,
+                message: "Public Profile Data for User " + reqId
+            });
+        });
+
+        // Current User Profile
+        app.get("/profile", (c) => {
+            const auth = c.req.header("Authorization");
+            if (!auth) return c.json({ error: "Unauthorized" });
+
+            const session = db_query("SELECT user_id FROM tokens WHERE token = ?", [auth]);
+            if (session.length == 0) return c.json({ error: "Invalid Token" });
+
+            const userId = session[0].user_id;
+            const user = db_query("SELECT username FROM users WHERE id = ?", [userId]);
+
+            return c.json({
+                id: userId,
+                username: user[0].username,
+                message: "Protected Profile Data"
+            });
+        });
+    });
+
+    // Multi-Layer & Multi-Param Demonstration
+    app.group("/test", () => {
+        app.get("/deep/:category/:id", (c) => {
+            return c.json({
+                message: "Deep Route Hit",
+                category: c.req.params.category,
+                id: c.req.params.id,
+                full_path: c.req.path
+            });
+        });
+    });
+
+});
+
+println("Starting server on port " + PORT + "...");
+app.listen({ port: PORT });

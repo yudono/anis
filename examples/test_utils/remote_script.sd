@@ -1,4 +1,0 @@
-export function sayHello(name) {
-    print("my name is : ");
-    println(name);
-}

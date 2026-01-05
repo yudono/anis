@@ -1,6 +1,6 @@
-#ifndef SUNDA_PARSER_H
-#define SUNDA_PARSER_H
-#define SUNDA_PARSER_H
+#ifndef ANIS_PARSER_H
+#define ANIS_PARSER_H
+#define ANIS_PARSER_H
 
 #include "token.h"
 #include <vector>

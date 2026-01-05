@@ -1,5 +1,5 @@
-#ifndef SUNDA_LEXER_H
-#define SUNDA_LEXER_H
+#ifndef ANIS_LEXER_H
+#define ANIS_LEXER_H
 
 #include <string>
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef SUNDA_FS_LIB_H
-#define SUNDA_FS_LIB_H
+#ifndef ANIS_FS_LIB_H
+#define ANIS_FS_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <fstream>

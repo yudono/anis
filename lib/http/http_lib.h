@@ -1,11 +1,12 @@
-#ifndef SUNDA_HTTP_LIB_H
-#define SUNDA_HTTP_LIB_H
+#ifndef ANIS_HTTP_LIB_H
+#define ANIS_HTTP_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <curl/curl.h>
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 namespace HTTPLib {
 
@@ -29,7 +30,7 @@ static std::string fetch(const std::string& method, const std::string& url, cons
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Sunda/1.0");
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Anis/1.0");
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
 
         // Set Method

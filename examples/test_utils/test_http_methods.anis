@@ -1,0 +1,41 @@
+import { http_get, http_post, http_put, http_patch, http_delete, http } from "http";
+import { str_length } from "string";
+
+const baseUrl = "https://jsonplaceholder.typicode.com/posts";
+
+println("--- Testing HTTP Methods ---");
+
+// 1. GET
+println("\n[GET] Fetching post/1...");
+const getRes = http_get(baseUrl + "/1");
+if (str_length(getRes) > 0) {
+    println("SUCCESS: GET received " + str_length(getRes) + " bytes");
+} else {
+    println("FAILED: GET");
+}
+
+// 2. Dynamic http() - POST with Quoted Headers
+println("\n[http] Dynamic POST with Quoted Headers...");
+const postData = '{"title": "foo", "body": "bar", "userId": 1}';
+const httpRes = http(baseUrl, {
+    method: "POST",
+    body: postData,
+    headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+        "X-Anis-Test": "Hello"
+    }
+});
+if (str_length(httpRes) > 0) {
+    println("SUCCESS: Dynamic http POST response: " + httpRes);
+} else {
+    println("FAILED: Dynamic http POST");
+}
+
+// 3. DELETE with Payload
+println("\n[DELETE] Deleting post/1 with payload...");
+const delRes = http_delete(baseUrl + "/1", '{"reason": "intentional"}', {
+    headers: { "Content-Type": "application/json" }
+});
+println("SUCCESS: DELETE Result: " + delRes);
+
+println("\n--- Done ---");

@@ -26,10 +26,10 @@ else ifeq ($(OS_NAME),linux)
     INCLUDES = $(shell pkg-config --cflags glfw3 freetype2 sqlite3 mysqlclient libcurl openssl)
     LDFLAGS = $(shell pkg-config --libs glfw3 freetype2 sqlite3 mysqlclient libcurl openssl) -lGL -lX11 -lpthread -ldl
 else ifeq ($(OS_NAME),windows)
-    # Windows build using DLLs from win/ directory
-    WIN_LIB_DIR = win
-    INCLUDES = -Iwin/include -Iwin/include/freetype2 -Iwin/include/mysql
-    LDFLAGS = -Lwin -lglfw3 -lfreetype -lsqlite3 -lmysqlcppconn-10-vs14 -lcurl-x64 -lssl -lcrypto -lgdi32 -lopengl32 -lwinmm -lws2_32
+    # Windows build - assumes libraries installed via MSYS2/MinGW
+    # DLL files in win/ are for runtime only
+    INCLUDES = -I/mingw64/include -I/mingw64/include/freetype2 -I/mingw64/include/mysql
+    LDFLAGS = -L/mingw64/lib -lglfw3 -lfreetype -lsqlite3 -lmysqlclient -lcurl -lssl -lcrypto -lgdi32 -lopengl32 -lwinmm -lws2_32
 endif
 
 # Common Includes
@@ -47,21 +47,21 @@ GUI_DIR = lib/gui
 LANG_SRC = core/lang/lexer.cpp core/lang/parser.cpp core/lang/interpreter.cpp core/lang/value_impl.cpp
 LIB_SRC = lib/register.cpp lib/string/string.cpp lib/array/array.cpp lib/map/map.cpp
 GUI_SRC = lib/gui/renderer.cpp lib/gui/parser.cpp lib/gui/widgets.cpp lib/gui/layout.cpp lib/gui/minigui.cpp
-MAIN_SRC = sunda.cpp
+MAIN_SRC = anis.cpp
 
 # Object files (placed in BUILD_DIR)
 LANG_OBJ = $(patsubst core/lang/%.cpp, $(BUILD_DIR)/lang_%.o, $(LANG_SRC))
 LIB_OBJ = $(BUILD_DIR)/register.o $(BUILD_DIR)/string_string.o $(BUILD_DIR)/array_array.o $(BUILD_DIR)/map_map.o
 GUI_OBJ = $(patsubst lib/gui/%.cpp, $(BUILD_DIR)/gui_%.o, $(GUI_SRC))
-MAIN_OBJ = $(BUILD_DIR)/sunda.o
+MAIN_OBJ = $(BUILD_DIR)/anis.o
 
 OBJS = $(MAIN_OBJ) $(LIB_OBJ) $(LANG_OBJ) $(GUI_OBJ)
 
-TARGET_NAME = sunda$(EXE_EXT)
+TARGET_NAME = anis$(EXE_EXT)
 TARGET = $(BUILD_DIR)/$(TARGET_NAME)
-FINAL_BIN = $(BIN_DIR)/sunda$(EXE_EXT)
+FINAL_BIN = $(BIN_DIR)/anis$(EXE_EXT)
 
-.PHONY: all clean check_deps setup copy sunda
+.PHONY: all clean check_deps setup copy anis
 
 all: check_deps setup $(TARGET) copy
 
@@ -111,7 +111,7 @@ $(BUILD_DIR)/array_array.o: lib/array/array.cpp
 $(BUILD_DIR)/map_map.o: lib/map/map.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-$(BUILD_DIR)/sunda.o: sunda.cpp
+$(BUILD_DIR)/anis.o: anis.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 $(TARGET): $(OBJS)
@@ -125,7 +125,80 @@ ifeq ($(OS_NAME),windows)
 endif
 	@echo "Build successful! Binary location: $(FINAL_BIN)"
 
-sunda: all
+anis: all
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
+
+# MinGW Cross-Compilation Target (macOS/Linux -> Windows)
+mingw:
+	@echo "Building for Windows using MinGW cross-compiler..."
+	@mkdir -p build/windows
+	@mkdir -p bin
+	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall \
+		-Iwin/include -Ilib/gui -Icore/lang -I. \
+		anis.cpp \
+		lib/register.cpp \
+		lib/string/string.cpp \
+		lib/array/array.cpp \
+		lib/map/map.cpp \
+		core/lang/lexer.cpp \
+		core/lang/parser.cpp \
+		core/lang/interpreter.cpp \
+		core/lang/value_impl.cpp \
+		lib/gui/renderer.cpp \
+		lib/gui/parser.cpp \
+		lib/gui/widgets.cpp \
+		lib/gui/layout.cpp \
+		lib/gui/minigui.cpp \
+		-Lwin \
+		-lglfw3 -lfreetype -lsqlite3 -lcurl -lmysqlcppconn-10-vs14 \
+		-lssl -lcrypto -lgdi32 -lopengl32 -lwinmm -lws2_32 \
+		-o build/windows/anis.exe
+	@cp build/windows/anis.exe bin/anis.exe
+	@cp win/*.dll bin/
+	@echo "Windows build complete! Binary: bin/anis.exe"
+	@echo "DLLs copied to bin/"
+
+# MinGW Compile-Only (no linking) - for testing when .lib files are not available
+mingw-compile-only:
+	@echo "Compiling for Windows (compile-only, no linking)..."
+	@mkdir -p build/windows
+	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -c \
+		-Iwin/include -Ilib/gui -Icore/lang -I. \
+		anis.cpp -o build/windows/anis.o
+	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -c \
+		-Iwin/include -Ilib/gui -Icore/lang -I. \
+		lib/register.cpp -o build/windows/register.o
+	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -c \
+		-Iwin/include -Ilib/gui -Icore/lang -I. \
+		lib/string/string.cpp -o build/windows/string.o
+	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -c \
+		-Iwin/include -Ilib/gui -Icore/lang -I. \
+		core/lang/interpreter.cpp -o build/windows/interpreter.o
+	@echo "Compilation successful! Object files in build/windows/"
+	@echo "Note: Linking skipped (requires .lib files in win/lib/)"
+
+# MinGW Minimal Build - Links only with Windows system libraries (no external deps)
+# This creates a basic executable but without GLFW/GUI, database, HTTP features
+mingw-minimal:
+	@echo "Building minimal Windows executable (system libs only)..."
+	@mkdir -p build/windows
+	@mkdir -p bin
+	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall \
+		-DMINIMAL_BUILD \
+		-Iwin/include -Ilib/gui -Icore/lang -I. \
+		anis.cpp \
+		lib/register.cpp \
+		lib/string/string.cpp \
+		lib/array/array.cpp \
+		lib/map/map.cpp \
+		core/lang/lexer.cpp \
+		core/lang/parser.cpp \
+		core/lang/interpreter.cpp \
+		core/lang/value_impl.cpp \
+		-lgdi32 -lwinmm -lws2_32 \
+		-o build/windows/anis.exe
+	@cp build/windows/anis.exe bin/anis.exe
+	@echo "✅ Minimal Windows build complete! Binary: bin/anis.exe"
+	@echo "Note: GUI, Database, HTTP features disabled (no external libs)"

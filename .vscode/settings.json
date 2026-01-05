@@ -1,6 +1,6 @@
 {
     "files.associations": {
-        "*.sd": "javascript"
+        "*.anis": "javascript"
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[javascript]": {

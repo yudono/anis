@@ -1,7 +1,12 @@
-#ifndef SUNDA_MYSQL_DRIVER_H
-#define SUNDA_MYSQL_DRIVER_H
+#ifndef ANIS_MYSQL_DRIVER_H
+#define ANIS_MYSQL_DRIVER_H
 
 #include "../db_driver.h"
+
+// MySQL C API driver only available on Unix systems
+// Windows would need different implementation (JDBC/ODBC)
+#ifndef _WIN32
+
 #include <mysql/mysql.h>
 #include <stdexcept>
 #include <iostream>
@@ -221,4 +226,5 @@ public:
 
 } // namespace Database
 
-#endif
+#endif // !_WIN32
+#endif // ANIS_MYSQL_DRIVER_H

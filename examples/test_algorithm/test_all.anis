@@ -1,0 +1,20 @@
+println("=== TEST BASIC ===")
+import "./test_basic.anis"
+println("=== TEST FUNCTION ===")
+import "./test_function.anis"
+println("=== TEST RECURSION ===")
+import "./test_recursion.anis"
+println("=== TEST FIBONACCI ===")
+import "./test_fibonacci.anis"
+println("=== TEST ARRAY SORT ===")
+import "./test_array_sort.anis"
+println("=== TEST OBJECT ===")
+import "./test_object.anis"
+println("=== TEST ARRAY OBJECT ===")
+import "./test_array_object.anis"
+println("=== TEST STATE ===")
+import "./test_state.anis"
+println("=== TEST CRUD ===")
+import "./test_crud.anis"
+
+println("=== ALL TESTS FINISHED ===")

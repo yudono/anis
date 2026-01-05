@@ -1,6 +1,6 @@
 # Standard Library
 
-Sunda comes with built-in modules for common tasks.
+Anis comes with built-in modules for common tasks.
 
 ## Global Functions
 
@@ -11,7 +11,7 @@ Sunda comes with built-in modules for common tasks.
 ```javascript
 import { split, join, replace, concat, find, substring, str_length } from "string";
 
-var s = "Hello Sunda";
+var s = "Hello Anis";
 println(str_length(s)); // 11
 ```
 
@@ -51,13 +51,13 @@ const users = db_query("SELECT * FROM users");
 ### `json` Module
 The `json` module provides utilities for parsing and serializing JSON data.
 
-- `json_parse(string)`: Parses a JSON string and returns it as a Sunda `Value` (map, array, number, string, or boolean).
+- `json_parse(string)`: Parses a JSON string and returns it as a Anis `Value` (map, array, number, string, or boolean).
 
 Example:
 ```javascript
 import { json_parse } from "json";
-const obj = json_parse('{"name": "Sunda", "stable": true}');
-println(obj.name); // Sunda
+const obj = json_parse('{"name": "Anis", "stable": true}');
+println(obj.name); // Anis
 ```
 
 ### `http` Module
@@ -103,12 +103,12 @@ const res2 = http_get("https://api.example.com/data", {
 ```
 
 ### Remote Imports
-Sunda supports importing modules directly from the web.
+Anis supports importing modules directly from the web.
 ```javascript
-import { sayHello } from "https://example.com/scripts/hello.sd";
+import { sayHello } from "https://example.com/scripts/hello.anis";
 sayHello("World");
 ```
-*Note: The remote URL must serve valid Sunda source code.*
+*Note: The remote URL must serve valid Anis source code.*
 
 ### `webserver` Module
 The `webserver` module provides a low-level TCP/IP server with a high-level API.

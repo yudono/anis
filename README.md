@@ -1,6 +1,10 @@
-# 🏝️ Sunda Programming Language
+# 🏝️ Anis Programming Language
 
-Sunda is a modern, lightweight, and cross-platform programming language built in C++. It features a JavaScript-like syntax, a built-in GUI library with JSX-style layout, and an interactive REPL.
+<p align="center">
+  <img src="logo.png" alt="Anis Programming Language Logo" width="400"/>
+</p>
+
+Anis is a modern, lightweight, and cross-platform programming language built in C++. It features a JavaScript-like syntax, a built-in GUI library with JSX-style layout, and an interactive REPL.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -38,8 +42,8 @@ sudo apt-get install clang libglfw3-dev libfreetype6-dev libsqlite3-dev libmysql
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yudono/sunda.git
-   cd sunda
+   git clone https://github.com/yudono/anis.git
+   cd anis
    ```
 
 2. Build the project:
@@ -47,24 +51,24 @@ sudo apt-get install clang libglfw3-dev libfreetype6-dev libsqlite3-dev libmysql
    make
    ```
 
-3. The binary will be available at `bin/sunda`.
+3. The binary will be available at `bin/anis`.
 
 ## 📖 Usage
 
 ### Running a Script
 ```bash
-./bin/sunda examples/test_syntax/test_hello_world.sd
+./bin/anis examples/test_syntax/test_hello_world.anis
 ```
 
 ### Interactive REPL
 Simply run the binary without arguments:
 ```bash
-./bin/sunda
+./bin/anis
 ```
 
 ### Help & Documentation
 ```bash
-./bin/sunda --help
+./bin/anis --help
 ```
 
 For detailed documentation, explore the files in the `DOCS/` directory:
@@ -72,7 +76,7 @@ For detailed documentation, explore the files in the `DOCS/` directory:
 - [Language Syntax](DOCS/syntax.md): Syntax, variables, and control flow.
 - [GUI Components](DOCS/gui.md): Building UIs with JSX-style components.
 - [Standard Library](DOCS/stdlib.md): Reference for built-in modules.
-- [Native Library Guide](DOCS/native_library_guide.md): Guide for extending Sunda with C++.
+- [Native Library Guide](DOCS/native_library_guide.md): Guide for extending Anis with C++.
 
 ## 📸 Screenshots
 
