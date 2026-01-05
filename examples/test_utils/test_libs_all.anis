@@ -10,7 +10,7 @@ println("🧪 Verifying Standard Library Expansion...");
 // 1. FS Verification
 println("\n[FS] Testing File System...");
 const testFile = "test_fs.txt";
-const testContent = "Hello from Sunda FS!";
+const testContent = "Hello from Anis FS!";
 fs_writeFile(testFile, testContent);
 if (fs_exists(testFile)) {
     const read = fs_readFile(testFile);
@@ -31,7 +31,7 @@ if (path != "undefined") {
 }
 
 println("\n[STRING] Testing Enhancements...");
-const full = concat("Sunda", " ", "Runtime");
+const full = concat("Anis", " ", "Runtime");
 println("✅ Concat: " + full);
 const pos = find(full, "Runtime");
 println("✅ Find 'Runtime' at: " + pos);
@@ -47,7 +47,7 @@ const email = "user@example.com";
 const isEmail = regex_match(email, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
 println("📧 Email match: " + (isEmail ? "PASS" : "FAIL"));
 
-const replaced = regex_replace("Sunda 2025", "[0-9]+", "YEAR");
+const replaced = regex_replace("Anis 2025", "[0-9]+", "YEAR");
 println("🔄 Replace digits: " + replaced);
 
 println("\n🏁 Library Verification Complete.");

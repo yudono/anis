@@ -1,5 +1,5 @@
-#ifndef SUNDA_DATABASE_LIB_H
-#define SUNDA_DATABASE_LIB_H
+#ifndef ANIS_DATABASE_LIB_H
+#define ANIS_DATABASE_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include "db_driver.h"

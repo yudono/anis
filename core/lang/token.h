@@ -1,5 +1,5 @@
-#ifndef SUNDA_TOKEN_H
-#define SUNDA_TOKEN_H
+#ifndef ANIS_TOKEN_H
+#define ANIS_TOKEN_H
 
 #include <string>
 #include <iostream>

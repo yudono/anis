@@ -1,5 +1,5 @@
-#ifndef SUNDA_WEBSERVER_LIB_H
-#define SUNDA_WEBSERVER_LIB_H
+#ifndef ANIS_WEBSERVER_LIB_H
+#define ANIS_WEBSERVER_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include "tcp_server.h"
@@ -16,7 +16,7 @@ namespace WebServer {
 struct Route {
     std::string method;
     std::string path;
-    Value handler; // Sunda closure
+    Value handler; // Anis closure
 };
 
 class ServerInstance {

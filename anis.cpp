@@ -57,17 +57,17 @@ AppState appState;
 bool Debugger::isReplMode = false;
 
 void printHelp() {
-    std::cout << COLOR_CYAN << "Sunda Programming Language" << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "Anis Programming Language" << COLOR_RESET << std::endl;
     std::cout << std::endl;
     std::cout << COLOR_GREEN << "USAGE:" << COLOR_RESET << std::endl;
-    std::cout << "  sunda                        Enter REPL mode" << std::endl;
-    std::cout << "  sunda <file.sd>              Run a Sunda script" << std::endl;
-    std::cout << "  sunda --help                 Show this help message" << std::endl;
+    std::cout << "  anis                        Enter REPL mode" << std::endl;
+    std::cout << "  anis <file.anis>              Run an Anis script" << std::endl;
+    std::cout << "  anis --help                 Show this help message" << std::endl;
     std::cout << std::endl;
     std::cout << COLOR_GREEN << "EXAMPLES:" << COLOR_RESET << std::endl;
-    std::cout << "  sunda                        Start interactive shell" << std::endl;
-    std::cout << "  sunda examples/hello.sd      Run hello.sd" << std::endl;
-    std::cout << "  sunda myapp/main.sd          Run GUI application" << std::endl;
+    std::cout << "  anis                        Start interactive shell" << std::endl;
+    std::cout << "  anis examples/hello.anis      Run hello.anis" << std::endl;
+    std::cout << "  anis myapp/main.anis          Run GUI application" << std::endl;
     std::cout << std::endl;
     std::cout << COLOR_GREEN << "FEATURES:" << COLOR_RESET << std::endl;
     std::cout << "  • Modern JavaScript-like syntax" << std::endl;
@@ -84,12 +84,12 @@ void runREPL() {
     Interpreter interpreter;
     register_std_libs(interpreter);
 
-    std::cout << COLOR_CYAN << "Sunda REPL (v1.0.0)" << COLOR_RESET << std::endl;
+    std::cout << COLOR_CYAN << "Anis REPL (v1.0.0)" << COLOR_RESET << std::endl;
     std::cout << "Type 'exit' to quit." << std::endl;
 
     std::string line;
     while (true) {
-        std::cout << COLOR_GREEN << "sunda> " << COLOR_RESET;
+        std::cout << COLOR_GREEN << "anis> " << COLOR_RESET;
         if (!std::getline(std::cin, line) || line == "exit") break;
         if (line.empty()) continue;
 
@@ -181,7 +181,9 @@ int main(int argc, char* argv[]) {
         bool dumpTokens = false;
         std::string filePath;
         
-        if (std::string(argv[1]) == "--dump-tokens") {
+        if (std::string(argv[1]) == "--help") {
+            printHelp();
+        } else if (std::string(argv[1]) == "--dump-tokens") {
             dumpTokens = true;
             if (argc > 2) filePath = argv[2];
         } else {
@@ -189,9 +191,7 @@ int main(int argc, char* argv[]) {
             if (argc > 2 && std::string(argv[2]) == "--dump-tokens") dumpTokens = true;
         }
 
-        if (filePath.empty()) {
-            printHelp();
-        } else {
+        if (!filePath.empty()) {
             result = runFile(filePath, dumpTokens);
         }
     }

@@ -18,7 +18,7 @@ if (!connected) {
     // 3. Parameterized Insert (Prevention of SQL Injection)
     const users = [
         { name: "Yudono", email: "yudono@example.com" },
-        { name: "Sunda Agent", email: "agent@sunda.io" },
+        { name: "Anis Agent", email: "agent@anis.io" },
         { name: "Malicious User'); DROP TABLE users; --", email: "hacker@evil.com" }
     ];
 

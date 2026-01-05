@@ -1,17 +1,17 @@
-# Getting Started with Sunda
+# Getting Started with Anis
 
-This guide will help you install Sunda and write your first program.
+This guide will help you install Anis and write your first program.
 
 ## Installation
 
 ### From Source (Recommended)
 
-Sunda is built using C++11 and requires GLFW and FreeType libraries.
+Anis is built using C++11 and requires GLFW and FreeType libraries.
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yudono/sunda.git
-    cd sunda
+    git clone https://github.com/yudono/anis.git
+    cd anis
     ```
 
 2.  **Install dependencies**:
@@ -25,40 +25,40 @@ Sunda is built using C++11 and requires GLFW and FreeType libraries.
 
 4.  **Verify**:
     ```bash
-    ./bin/sunda --help
+    ./bin/anis --help
     ```
 
 ## Your First Script
 
-Create a file named `hello.sd`:
+Create a file named `hello.anis`:
 
 ```javascript
-println("Hello from Sunda!");
+println("Hello from Anis!");
 
 var name = "Island";
-println("Welcome to Sunda " + name);
+println("Welcome to Anis " + name);
 ```
 
 Run it:
 ```bash
-./bin/sunda hello.sd
+./bin/anis hello.anis
 ```
 
 ## Using the REPL
 
-Sunda includes an interactive Read-Eval-Print Loop (REPL). It's great for testing small snippets.
+Anis includes an interactive Read-Eval-Print Loop (REPL). It's great for testing small snippets.
 
 1.  **Start REPL**:
     ```bash
-    ./bin/sunda
+    ./bin/anis
     ```
 
 2.  **Try some commands**:
     ```
-    sunda> var x = 10
-    sunda> x * 5
+    anis> var x = 10
+    anis> x * 5
     => 50
-    sunda> println("REPL is active")
+    anis> println("REPL is active")
     REPL is active
     => undefined
     ```

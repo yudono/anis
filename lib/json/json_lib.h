@@ -1,5 +1,5 @@
-#ifndef SUNDA_JSON_LIB_H
-#define SUNDA_JSON_LIB_H
+#ifndef ANIS_JSON_LIB_H
+#define ANIS_JSON_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <vector>

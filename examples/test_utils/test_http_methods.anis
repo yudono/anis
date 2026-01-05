@@ -22,7 +22,7 @@ const httpRes = http(baseUrl, {
     body: postData,
     headers: {
         "Content-Type": "application/json; charset=UTF-8",
-        "X-Sunda-Test": "Hello"
+        "X-Anis-Test": "Hello"
     }
 });
 if (str_length(httpRes) > 0) {

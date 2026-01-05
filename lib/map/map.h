@@ -1,5 +1,5 @@
-#ifndef SUNDA_MAP_LIB_H
-#define SUNDA_MAP_LIB_H
+#ifndef ANIS_MAP_LIB_H
+#define ANIS_MAP_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <map>

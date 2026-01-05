@@ -28,8 +28,8 @@ println("  trim('  hello world  ') = '" + clean + "'")
 println("")
 println("4. Testing replace():")
 var original = "Hello World"
-var replaced = replace(original, "World", "Sunda")
-println("  replace('Hello World', 'World', 'Sunda') = " + replaced)
+var replaced = replace(original, "World", "Anis")
+println("  replace('Hello World', 'World', 'Anis') = " + replaced)
 
 // Test toUpperCase
 println("")

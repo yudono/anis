@@ -1,5 +1,5 @@
-#ifndef SUNDA_SQLITE_DRIVER_H
-#define SUNDA_SQLITE_DRIVER_H
+#ifndef ANIS_SQLITE_DRIVER_H
+#define ANIS_SQLITE_DRIVER_H
 
 #include "../db_driver.h"
 #include <sqlite3.h>

@@ -1,6 +1,6 @@
 # Language Syntax
 
-Sunda's syntax is heavily inspired by JavaScript (ECMAScript), making it familiar and easy to learn.
+Anis's syntax is heavily inspired by JavaScript (ECMAScript), making it familiar and easy to learn.
 
 ## Variables
 
@@ -8,7 +8,7 @@ Variables can be declared using `var` or `const`.
 
 ```javascript
 var age = 25;
-const name = "Sunda";
+const name = "Anis";
 
 age = 26; // Success
 // name = "New Name"; // Error (const if implemented, currently similar to var)

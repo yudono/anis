@@ -1,5 +1,5 @@
-#ifndef SUNDA_MYSQL_DRIVER_H
-#define SUNDA_MYSQL_DRIVER_H
+#ifndef ANIS_MYSQL_DRIVER_H
+#define ANIS_MYSQL_DRIVER_H
 
 #include "../db_driver.h"
 
@@ -227,4 +227,4 @@ public:
 } // namespace Database
 
 #endif // !_WIN32
-#endif // SUNDA_MYSQL_DRIVER_H
+#endif // ANIS_MYSQL_DRIVER_H

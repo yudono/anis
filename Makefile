@@ -47,21 +47,21 @@ GUI_DIR = lib/gui
 LANG_SRC = core/lang/lexer.cpp core/lang/parser.cpp core/lang/interpreter.cpp core/lang/value_impl.cpp
 LIB_SRC = lib/register.cpp lib/string/string.cpp lib/array/array.cpp lib/map/map.cpp
 GUI_SRC = lib/gui/renderer.cpp lib/gui/parser.cpp lib/gui/widgets.cpp lib/gui/layout.cpp lib/gui/minigui.cpp
-MAIN_SRC = sunda.cpp
+MAIN_SRC = anis.cpp
 
 # Object files (placed in BUILD_DIR)
 LANG_OBJ = $(patsubst core/lang/%.cpp, $(BUILD_DIR)/lang_%.o, $(LANG_SRC))
 LIB_OBJ = $(BUILD_DIR)/register.o $(BUILD_DIR)/string_string.o $(BUILD_DIR)/array_array.o $(BUILD_DIR)/map_map.o
 GUI_OBJ = $(patsubst lib/gui/%.cpp, $(BUILD_DIR)/gui_%.o, $(GUI_SRC))
-MAIN_OBJ = $(BUILD_DIR)/sunda.o
+MAIN_OBJ = $(BUILD_DIR)/anis.o
 
 OBJS = $(MAIN_OBJ) $(LIB_OBJ) $(LANG_OBJ) $(GUI_OBJ)
 
-TARGET_NAME = sunda$(EXE_EXT)
+TARGET_NAME = anis$(EXE_EXT)
 TARGET = $(BUILD_DIR)/$(TARGET_NAME)
-FINAL_BIN = $(BIN_DIR)/sunda$(EXE_EXT)
+FINAL_BIN = $(BIN_DIR)/anis$(EXE_EXT)
 
-.PHONY: all clean check_deps setup copy sunda
+.PHONY: all clean check_deps setup copy anis
 
 all: check_deps setup $(TARGET) copy
 
@@ -111,7 +111,7 @@ $(BUILD_DIR)/array_array.o: lib/array/array.cpp
 $(BUILD_DIR)/map_map.o: lib/map/map.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-$(BUILD_DIR)/sunda.o: sunda.cpp
+$(BUILD_DIR)/anis.o: anis.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 $(TARGET): $(OBJS)
@@ -125,7 +125,7 @@ ifeq ($(OS_NAME),windows)
 endif
 	@echo "Build successful! Binary location: $(FINAL_BIN)"
 
-sunda: all
+anis: all
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
@@ -137,7 +137,7 @@ mingw:
 	@mkdir -p bin
 	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall \
 		-Iwin/include -Ilib/gui -Icore/lang -I. \
-		sunda.cpp \
+		anis.cpp \
 		lib/register.cpp \
 		lib/string/string.cpp \
 		lib/array/array.cpp \
@@ -154,10 +154,10 @@ mingw:
 		-Lwin \
 		-lglfw3 -lfreetype -lsqlite3 -lcurl -lmysqlcppconn-10-vs14 \
 		-lssl -lcrypto -lgdi32 -lopengl32 -lwinmm -lws2_32 \
-		-o build/windows/sunda.exe
-	@cp build/windows/sunda.exe bin/sunda.exe
+		-o build/windows/anis.exe
+	@cp build/windows/anis.exe bin/anis.exe
 	@cp win/*.dll bin/
-	@echo "Windows build complete! Binary: bin/sunda.exe"
+	@echo "Windows build complete! Binary: bin/anis.exe"
 	@echo "DLLs copied to bin/"
 
 # MinGW Compile-Only (no linking) - for testing when .lib files are not available
@@ -166,7 +166,7 @@ mingw-compile-only:
 	@mkdir -p build/windows
 	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -c \
 		-Iwin/include -Ilib/gui -Icore/lang -I. \
-		sunda.cpp -o build/windows/sunda.o
+		anis.cpp -o build/windows/anis.o
 	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall -c \
 		-Iwin/include -Ilib/gui -Icore/lang -I. \
 		lib/register.cpp -o build/windows/register.o
@@ -188,7 +188,7 @@ mingw-minimal:
 	x86_64-w64-mingw32-g++ -std=c++17 -O2 -Wall \
 		-DMINIMAL_BUILD \
 		-Iwin/include -Ilib/gui -Icore/lang -I. \
-		sunda.cpp \
+		anis.cpp \
 		lib/register.cpp \
 		lib/string/string.cpp \
 		lib/array/array.cpp \
@@ -198,7 +198,7 @@ mingw-minimal:
 		core/lang/interpreter.cpp \
 		core/lang/value_impl.cpp \
 		-lgdi32 -lwinmm -lws2_32 \
-		-o build/windows/sunda.exe
-	@cp build/windows/sunda.exe bin/sunda.exe
-	@echo "✅ Minimal Windows build complete! Binary: bin/sunda.exe"
+		-o build/windows/anis.exe
+	@cp build/windows/anis.exe bin/anis.exe
+	@echo "✅ Minimal Windows build complete! Binary: bin/anis.exe"
 	@echo "Note: GUI, Database, HTTP features disabled (no external libs)"

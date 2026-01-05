@@ -1,5 +1,5 @@
-#ifndef SUNDA_INTERPRETER_H
-#define SUNDA_INTERPRETER_H
+#ifndef ANIS_INTERPRETER_H
+#define ANIS_INTERPRETER_H
 
 #include "parser.h"
 #include <map>
@@ -132,7 +132,7 @@ public:
     int hookIndex = 0;
      
     std::string sourceCode; // For debug
-    std::string currentFile = "main.sd"; // Default
+    std::string currentFile = "main.anis"; // Default
     int currentLine = 0;
     
     void resetHooks() { hookIndex = 0; }

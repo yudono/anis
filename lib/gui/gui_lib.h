@@ -78,7 +78,7 @@ struct GuiLib {
 
          // 4. Render GUI
          interpreter.registerNative("render_gui", [&](std::vector<Value> args) {
-             std::cout << "Starting GUI from Sunda..." << std::endl;
+             std::cout << "Starting GUI from Anis..." << std::endl;
              if (args.size() > 0 && args[0].isClosure) {
                   Value component = args[0]; // The App function
                   

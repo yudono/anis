@@ -1,5 +1,5 @@
-#ifndef SUNDA_ARRAY_LIB_H
-#define SUNDA_ARRAY_LIB_H
+#ifndef ANIS_ARRAY_LIB_H
+#define ANIS_ARRAY_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <vector>

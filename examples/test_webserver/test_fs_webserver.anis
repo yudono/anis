@@ -17,7 +17,7 @@ app.get("/", (c) => {
 });
 
 app.get("/api/info", (c) => {
-    return c.text("Sunda Runtime Static Server v1.0");
+    return c.text("Anis Runtime Static Server v1.0");
 });
 
 println("Server running on http://localhost:3000");

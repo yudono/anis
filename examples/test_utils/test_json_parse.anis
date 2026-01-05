@@ -1,6 +1,6 @@
 import { json_parse } from "json";
 
-const raw = '{"name": "Sunda", "version": 1, "features": ["GUI", "Web", "DB"], "meta": {"stable": true, "author": null}}';
+const raw = '{"name": "Anis", "version": 1, "features": ["GUI", "Web", "DB"], "meta": {"stable": true, "author": null}}';
 const data = json_parse(raw);
 
 println("Name: " + data.name);

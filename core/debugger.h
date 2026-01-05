@@ -1,5 +1,5 @@
-#ifndef SUNDA_DEBUGGER_H
-#define SUNDA_DEBUGGER_H
+#ifndef ANIS_DEBUGGER_H
+#define ANIS_DEBUGGER_H
 
 #include <string>
 #include <iostream>
@@ -97,7 +97,7 @@ public:
 
 // Definition of static member should be in a .cpp file usually,
 // but if we want to keep it header-only for now we can use inline (C++17) 
-// or define it in sunda.cpp.
+// or define it in anis.cpp.
 // Since we have core/debugger.h let's see if there is a debugger.cpp.
 
 #endif

@@ -4,14 +4,14 @@ import { db_connect, db_execute, db_query, db_close, db_error } from "db";
 println("🚀 Starting MySQL Database Verification...");
 
 // URL format: mysql://user:password@host:port/dbname
-const url = "mysql://root:password@localhost:3306/sunda";
+const url = "mysql://root:password@localhost:3306/anis";
 
 println("🔗 Attempting to connect to: " + url);
 const connected = db_connect(url);
 
 if (!connected) {
     println("❌ Failed to connect: " + db_error());
-    println("💡 Note: Make sure MySQL is running and the database 'sunda' exists.");
+    println("💡 Note: Make sure MySQL is running and the database 'anis' exists.");
 } else {
     println("✅ Connected to MySQL");
 
@@ -23,7 +23,7 @@ if (!connected) {
     // Insert Data
     const users = [
         { name: "Yudono", email: "yudono@example.com" },
-        { name: "MySQL User", email: "mysql@sunda.io" }
+        { name: "MySQL User", email: "mysql@anis.io" }
     ];
 
     var i = 0;

@@ -1,5 +1,5 @@
-#ifndef SUNDA_STRING_LIB_H
-#define SUNDA_STRING_LIB_H
+#ifndef ANIS_STRING_LIB_H
+#define ANIS_STRING_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <string>

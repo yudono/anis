@@ -36,7 +36,7 @@ void Interpreter::setVar(std::string name, Value v) {
     // Interpreter Logic: assign if exists, else define in current?
     // User requested behavior: "var count" defines it. "count = 1" assigns.
     // If we just use setVar for both?
-    // Current Sunda: `varDecl` uses define. `assignment` uses assign.
+    // Current Anis: `varDecl` uses define. `assignment` uses assign.
     
     // Helper: this function is for assignment (update)
     environment->assign(name, v);
@@ -110,9 +110,9 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
 
         // File loading
         std::string filename = imp->moduleName;
-        // User requested .sd extension, support .s (legacy) and .sd
+        // User requested .anis extension, support .s (legacy) and .anis
         if (filename.find('.') == std::string::npos && filename.find("://") == std::string::npos) {
-            filename += ".sd";
+            filename += ".anis";
         }
         
         std::string source;

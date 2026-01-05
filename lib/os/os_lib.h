@@ -1,5 +1,5 @@
-#ifndef SUNDA_OS_LIB_H
-#define SUNDA_OS_LIB_H
+#ifndef ANIS_OS_LIB_H
+#define ANIS_OS_LIB_H
 
 #include "../../core/lang/interpreter.h"
 #include <cstdlib>

@@ -1,6 +1,6 @@
 import { render_gui, setState } from "gui"
-import { ListView } from "./views/list.sd"
-import { FormView } from "./views/form.sd"
+import { ListView } from "./views/list.anis"
+import { FormView } from "./views/form.anis"
 
 function App() {
     const [view, setView] = setState("list")

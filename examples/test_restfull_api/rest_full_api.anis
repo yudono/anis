@@ -2,7 +2,7 @@ import { Webserver } from "webserver";
 import { db_connect, db_execute, db_query, db_close } from "db";
 
 // 1. Initialize Database
-const dbPath = env("DB_PATH") || "examples/test_restfull_api/sunda.db";
+const dbPath = env("DB_PATH") || "examples/test_restfull_api/anis.db";
 const connected = db_connect("sqlite://" + dbPath);
 
 if (!connected) {
